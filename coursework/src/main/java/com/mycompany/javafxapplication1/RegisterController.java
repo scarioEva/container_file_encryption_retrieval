@@ -70,12 +70,12 @@ public class RegisterController {
         
     }
 
-    private void dialogue(String headerMsg, String contentMsg) {
+    private void dialogue(String headerMsg, String contentMsg,Alert.AlertType alertType) {
         Stage secondaryStage = new Stage();
         Group root = new Group();
         Scene scene = new Scene(root, 300, 300, Color.DARKGRAY);
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirmation Dialog");
+        Alert alert = new Alert(alertType);
+        alert.setTitle(alertType == Alert.AlertType.CONFIRMATION? "Confirmation Dialog":"Error Dialog");
         alert.setHeaderText(headerMsg);
         alert.setContentText(contentMsg);
         Optional<ButtonType> result = alert.showAndWait();
@@ -88,28 +88,42 @@ public class RegisterController {
         try {
             FXMLLoader loader = new FXMLLoader();
             DB myObj = new DB();
-            if (passPasswordField.getText().equals(rePassPasswordField.getText())) {
-                myObj.addDataToDB(userTextField.getText(), passPasswordField.getText());
-                dialogue("Adding information to the database", "Successful!");
-                String[] credentials = {userTextField.getText(), passPasswordField.getText()};
-                loader.setLocation(getClass().getResource("secondary.fxml"));
-                Parent root = loader.load();
-                Scene scene = new Scene(root, 640, 480);
-                secondaryStage.setScene(scene);
-                SecondaryController controller = loader.getController();
-                secondaryStage.setTitle("Show users");
-                controller.initialise(credentials);
-                String msg = "some data sent from Register Controller";
-                secondaryStage.setUserData(msg);
-            } else {
-                loader.setLocation(getClass().getResource("register.fxml"));
-                Parent root = loader.load();
-                Scene scene = new Scene(root, 640, 480);
-                secondaryStage.setScene(scene);
-                secondaryStage.setTitle("Register a new User");
+            if(userTextField.getText().equals("") || passPasswordField.getText().equals("")){
+                dialogue("Error", "Username or password cannot be empty!",Alert.AlertType.ERROR);
             }
-            secondaryStage.show();
-            primaryStage.close();
+            else{
+                  if (passPasswordField.getText().equals(rePassPasswordField.getText())) {
+                      if(!myObj.validateUser(userTextField.getText())){
+                        myObj.addDataToDB(userTextField.getText(), passPasswordField.getText());
+                        dialogue("Adding information to the database", "Successful!",Alert.AlertType.CONFIRMATION);
+                        String[] credentials = {userTextField.getText(), passPasswordField.getText()};
+                        loader.setLocation(getClass().getResource("secondary.fxml"));
+                        Parent root = loader.load();
+                        Scene scene = new Scene(root, 640, 480);
+                        secondaryStage.setScene(scene);
+                        SecondaryController controller = loader.getController();
+                        secondaryStage.setTitle("Show users");
+                        controller.initialise(credentials);
+                        String msg = "some data sent from Register Controller";
+                        secondaryStage.setUserData(msg);
+                      }
+                      else{
+                          dialogue("Error", "User already exist.",Alert.AlertType.ERROR);
+                          return;
+                      }
+                    
+                } else {
+                    dialogue("Error", "password and confirm password did not match.",Alert.AlertType.ERROR);
+                    loader.setLocation(getClass().getResource("register.fxml"));
+                    Parent root = loader.load();
+                    Scene scene = new Scene(root, 640, 480);
+                    secondaryStage.setScene(scene);
+                    secondaryStage.setTitle("Register a new User");
+                }
+                secondaryStage.show();
+                primaryStage.close();
+            }
+            
 
         } catch (Exception e) {
             e.printStackTrace();

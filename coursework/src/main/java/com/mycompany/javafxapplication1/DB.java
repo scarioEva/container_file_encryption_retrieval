@@ -195,6 +195,7 @@ public class DB {
      * @return true if the credentials are valid, otherwise false
      */
     public boolean validateUser(String user, String pass) throws InvalidKeySpecException, ClassNotFoundException {
+ 
         Boolean flag = false;
         try {
             Class.forName("org.sqlite.JDBC");
@@ -206,6 +207,37 @@ public class DB {
             // Let's iterate through the java ResultSet
             while (rs.next()) {
                 if (user.equals(rs.getString("name")) && rs.getString("password").equals(inPass)) {
+                    flag = true;
+                    break;
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                // connection close failed.
+                System.err.println(e.getMessage());
+            }
+        }
+
+        return flag;
+    }
+    
+    public boolean validateUser(String user) throws InvalidKeySpecException, ClassNotFoundException {
+        Boolean flag = false;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection(fileName);
+            var statement = connection.createStatement();
+            statement.setQueryTimeout(timeout);
+            ResultSet rs = statement.executeQuery("select name from " + this.dataBaseTableName);
+            // Let's iterate through the java ResultSet
+            while (rs.next()) {
+                if (user.toLowerCase().equals(rs.getString("name").toLowerCase())) {
                     flag = true;
                     break;
                 }
