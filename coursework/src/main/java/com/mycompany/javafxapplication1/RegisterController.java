@@ -65,7 +65,10 @@ public class RegisterController {
         File selectedFile = fileChooser.showOpenDialog(primaryStage);
         
         if(selectedFile!=null){
-            fileText.setText((String)selectedFile.getCanonicalPath());
+//            fileText.setText((String)selectedFile.getCanonicalPath());
+//            fileText.setText((String)selectedFile);
+
+//            selectedFile.ge
         }
         
     }
@@ -96,12 +99,13 @@ public class RegisterController {
                       if(!myObj.validateUser(userTextField.getText())){
                         myObj.addDataToDB(userTextField.getText(), passPasswordField.getText());
                         dialogue("Adding information to the database", "Successful!",Alert.AlertType.CONFIRMATION);
-                        String[] credentials = {userTextField.getText(), passPasswordField.getText()};
-                        loader.setLocation(getClass().getResource("secondary.fxml"));
+//                        String[] credentials = {userTextField.getText(), passPasswordField.getText()};
+                        String credentials=userTextField.getText();
+                        loader.setLocation(getClass().getResource("user.fxml"));
                         Parent root = loader.load();
                         Scene scene = new Scene(root, 640, 480);
                         secondaryStage.setScene(scene);
-                        SecondaryController controller = loader.getController();
+                        UserController controller = loader.getController();
                         secondaryStage.setTitle("Show users");
                         controller.initialise(credentials);
                         String msg = "some data sent from Register Controller";

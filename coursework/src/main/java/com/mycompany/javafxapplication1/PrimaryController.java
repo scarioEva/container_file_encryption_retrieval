@@ -2,6 +2,7 @@ package com.mycompany.javafxapplication1;
 
 import java.io.IOException;
 import java.util.Optional;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.event.ActionEvent;
@@ -59,26 +60,71 @@ public class PrimaryController {
 
         Optional<ButtonType> result = alert.showAndWait();
     }
+    
+    
+    private void userLogin(String credentials){
+        Stage secondaryStage = new Stage();
+        try{
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("user.fxml"));
+            Parent root = loader.load();
+            
+            Scene scene = new Scene(root, 640, 480);
+            secondaryStage.setScene(scene);
+            
+            UserController controller = loader.getController();
+            controller.initialise(credentials);
+ 
+            secondaryStage.setTitle("User");
+            String msg="some data sent from Primary Controller";
+            secondaryStage.setUserData(msg);
+            secondaryStage.show();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+    
+    private void adminLogin(String credentials){
+        Stage secondaryStage = new Stage();
+        try{
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("admin.fxml"));
+            Parent root = loader.load();
+            
+            Scene scene = new Scene(root, 640, 480);
+            secondaryStage.setScene(scene);
+            
+            AdminController controller = loader.getController();
+            controller.initialise(credentials);
+ 
+            secondaryStage.setTitle("Show Users");
+            String msg="some data sent from Primary Controller";
+            secondaryStage.setUserData(msg);
+            secondaryStage.show();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+    }
 
     @FXML
-    private void switchToSecondary() {
-        Stage secondaryStage = new Stage();
+    private void handleLogin() {
+        
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
         try {
             DB myObj = new DB();
-            String[] credentials = {userTextField.getText(), passPasswordField.getText()};
+//            String[] credentials = {userTextField.getText(), passPasswordField.getText()};
+            String credentials=userTextField.getText();
             if(myObj.validateUser(userTextField.getText(), passPasswordField.getText())){
-                FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(getClass().getResource("secondary.fxml"));
-                Parent root = loader.load();
-                Scene scene = new Scene(root, 640, 480);
-                secondaryStage.setScene(scene);
-                SecondaryController controller = loader.getController();
-                controller.initialise(credentials);
-                secondaryStage.setTitle("Show Users");
-                String msg="some data sent from Primary Controller";
-                secondaryStage.setUserData(msg);
-                secondaryStage.show();
+                
+                myObj.setUserActive(userTextField.getText(), true);
+                
+                if(!userTextField.getText().equals("admin"))
+                    userLogin(credentials);
+                else
+                    adminLogin(credentials);
+               
                 primaryStage.close();
             }
             else{

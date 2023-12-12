@@ -20,12 +20,12 @@ public class App extends Application {
         Stage secondaryStage = new Stage();
         DB myObj = new DB();
         myObj.log("-------- Simple Tutorial on how to make JDBC connection to SQLite DB ------------");
-        myObj.log("\n---------- Drop table ----------");
-        try {
-            myObj.delTable(myObj.getTableName());
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        myObj.log("\n---------- Drop table ----------");
+//        try {
+//            myObj.delTable(myObj.getTableName());
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         myObj.log("\n---------- Create table ----------");
         try {
             myObj.createTable(myObj.getTableName());

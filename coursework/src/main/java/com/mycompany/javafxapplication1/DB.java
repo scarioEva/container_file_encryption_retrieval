@@ -79,7 +79,7 @@ public class DB {
             connection = DriverManager.getConnection(fileName);
             var statement = connection.createStatement();
             statement.setQueryTimeout(timeout);
-            statement.executeUpdate("create table if not exists " + tableName + "(id integer primary key autoincrement, name string, password string)");
+            statement.executeUpdate("create table if not exists " + tableName + "(id integer primary key autoincrement, name string, password string, active boolean)");
 
         } catch (SQLException ex) {
             Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
@@ -133,7 +133,7 @@ public class DB {
             var statement = connection.createStatement();
             statement.setQueryTimeout(timeout);
 //            System.out.println("Adding User: " + user + ", Password: " + password);
-            statement.executeUpdate("insert into " + dataBaseTableName + " (name, password) values('" + user + "','" + generateSecurePassword(password) + "')");
+            statement.executeUpdate("insert into " + dataBaseTableName + " (name, password, active) values('" + user + "','" + generateSecurePassword(password) + "', true)");
         } catch (SQLException ex) {
             Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -308,7 +308,67 @@ public class DB {
         System.out.println(message);
 
     }
+    
+    public ObservableList<User> getActiveUser() throws ClassNotFoundException {
+        ObservableList<User> result = FXCollections.observableArrayList();
+        try {
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection(fileName);
+            var statement = connection.createStatement();
+            statement.setQueryTimeout(timeout);
+            ResultSet rs = statement.executeQuery("select * from " + this.dataBaseTableName+ " where active=true");
+            while (rs.next()) {
+                result.add(new User(rs.getString("name"),rs.getString("password")));
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                // connection close failed.
+                System.err.println(e.getMessage());
+            }
+        }
+        return result;
+    }
+    
+    public boolean setUserActive(String user, boolean active) throws InvalidKeySpecException, ClassNotFoundException {
+        Boolean flag = false;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection(fileName);
+            var statement = connection.createStatement();
+            statement.setQueryTimeout(timeout);
+            statement.executeUpdate("update " + dataBaseTableName + " set active="+active+" where name='"+user+"'");
+        } catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (connection != null) {
+                    flag=true;
+                    connection.close();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    if (connection != null) {
+                        flag=true;
+                        connection.close();
+                    }
+                } catch (SQLException e) {
+                    // connection close failed.
+                    System.err.println(e.getMessage());
+                }
+            }
+        }
 
+        return flag;
+    }
 //    public static void main(String[] args) throws InvalidKeySpecException {
 //        DB myObj = new DB();
 //        myObj.log("-------- Simple Tutorial on how to make JDBC connection to SQLite DB ------------");

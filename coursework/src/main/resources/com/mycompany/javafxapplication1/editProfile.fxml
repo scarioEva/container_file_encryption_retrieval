@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane id="AnchorPane" prefHeight="236.0" prefWidth="448.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="com.mycompany.javafxapplication1.EditProfileController">
+   <children>
+      <Label layoutX="138.0" layoutY="64.0" text="Username" />
+      <TextField fx:id="usernameText" layoutX="216.0" layoutY="59.0" />
+      <Button fx:id="changePassBtn" layoutX="215.0" layoutY="93.0" mnemonicParsing="false" onAction="#onChangePass" text="Change Password" />
+      <Button fx:id="cancelBtn" layoutX="140.0" layoutY="140.0" mnemonicParsing="false" onAction="#onCancel" text="Cancel" />
+      <Button fx:id="saveBtn" layoutX="215.0" layoutY="140.0" mnemonicParsing="false" onAction="#onSave" text="Save" />
+      <Label layoutX="180.0" layoutY="23.0" text="Edit Profile" />
+   </children>
+</AnchorPane>
