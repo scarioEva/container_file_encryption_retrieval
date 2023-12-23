@@ -320,7 +320,7 @@ public class DB {
         return flag;
     }
     
-        public boolean deleteUser(String id) throws InvalidKeySpecException, ClassNotFoundException {
+    public boolean deleteUser(String id) throws InvalidKeySpecException, ClassNotFoundException {
         Boolean flag = false;
         try {
             this.executeDb("delete from " + dataBaseTableName + " where id='"+id+"'", false);
