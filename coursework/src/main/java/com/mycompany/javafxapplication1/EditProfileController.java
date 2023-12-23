@@ -15,6 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -39,6 +40,9 @@ public class EditProfileController {
     @FXML
     private Button saveBtn;
     
+    @FXML
+    private Button deleteBtn;
+    
     private  void setUserPage(Stage stage){
         Stage primaryStage = (Stage) stage;
         mc.redirectUser(this.username);
@@ -56,8 +60,17 @@ public class EditProfileController {
     @FXML
     private void onSave(){
         try {
-            if(this.db.updateUsername(this.userId, usernameText.getText())){
-                setUserPage((Stage) saveBtn.getScene().getWindow());
+            if(!this.db.validateUser(usernameText.getText())){
+//                System.out.println(this.mc.dialogue("Confirm", "Are you sure you want to update username?", Alert.AlertType.CONFIRMATION)+"  confitm");
+                if(this.mc.dialogue("Confirm", "Are you sure you want to update your username?", Alert.AlertType.CONFIRMATION).equals("OK")){
+                    if(this.db.updateUsername(this.userId, usernameText.getText())){
+                        this.username=usernameText.getText();
+                        this.mc.dialogue("Success!", "Username updated successfully!", Alert.AlertType.INFORMATION);
+                    }
+                }
+            }
+            else{
+                this.mc.dialogue("Error", "User already exist.",Alert.AlertType.ERROR);
             }
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(EditProfileController.class.getName()).log(Level.SEVERE, null, ex);
@@ -66,13 +79,30 @@ public class EditProfileController {
         }
         
     }
+    
+    @FXML
+    private void onAccountDelete(){
+        Stage primaryStage = (Stage) deleteBtn.getScene().getWindow();
+        
+        if(this.mc.dialogue("Confirm", "Are you sure you want to delete your Account?", Alert.AlertType.CONFIRMATION).equals("OK")){
+            try {
+                if(this.db.deleteUser(this.userId)){
+                    if(this.mc.dialogue("Success!", "Account deleated successfully!", Alert.AlertType.INFORMATION).equals("OK")){
+                        this.mc.redirectLogin();
+                        primaryStage.close();
+                    }
+                }
+            } catch (InvalidKeySpecException ex) {
+                Logger.getLogger(EditProfileController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(EditProfileController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 
     public void initialise(String credentials) throws InvalidKeySpecException, ClassNotFoundException {
         this.username=credentials;
         usernameText.setText(this.username);
-        
         this.userId=this.db.getUserId(this.username);
-
     }
-    
 }

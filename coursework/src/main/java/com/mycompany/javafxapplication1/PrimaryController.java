@@ -43,18 +43,7 @@ public class PrimaryController {
         }
     }
     
-    private void dialogue(String headerMsg, String contentMsg) {
-        Stage secondaryStage = new Stage();
-        Group root = new Group();
-        Scene scene = new Scene(root, 300, 300, Color.DARKGRAY);
 
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Confirmation Dialog");
-        alert.setHeaderText(headerMsg);
-        alert.setContentText(contentMsg);
-
-        Optional<ButtonType> result = alert.showAndWait();
-    }
     
     
     private void userLogin(String credentials){
@@ -85,7 +74,7 @@ public class PrimaryController {
                 primaryStage.close();
             }
             else{
-                dialogue("Invalid User Name / Password","Please try again!");
+                this.mc.dialogue("Invalid User Name / Password","Please try again!",Alert.AlertType.ERROR);
             }
 
         } catch (Exception e) {

@@ -6,11 +6,16 @@ package com.mycompany.javafxapplication1;
 
 import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 /**
@@ -55,6 +60,18 @@ public class MainController {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public String dialogue(String headerMsg, String contentMsg,Alert.AlertType alertType) {
+        Stage secondaryStage = new Stage();
+        Group root = new Group();
+        Scene scene = new Scene(root, 300, 300, Color.DARKGRAY);
+        Alert alert = new Alert(alertType);
+//        alert.setTitle(alertType == Alert.AlertType.CONFIRMATION? "Confirmation Dialog":"Error Dialog");
+        alert.setHeaderText(headerMsg);
+        alert.setContentText(contentMsg);
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.get().getText();
     }
     
     public void redirectLogin(){

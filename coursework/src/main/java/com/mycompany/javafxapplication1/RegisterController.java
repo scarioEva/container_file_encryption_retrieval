@@ -75,42 +75,32 @@ public class RegisterController {
         
     }
 
-    private void dialogue(String headerMsg, String contentMsg,Alert.AlertType alertType) {
-        Stage secondaryStage = new Stage();
-        Group root = new Group();
-        Scene scene = new Scene(root, 300, 300, Color.DARKGRAY);
-        Alert alert = new Alert(alertType);
-        alert.setTitle(alertType == Alert.AlertType.CONFIRMATION? "Confirmation Dialog":"Error Dialog");
-        alert.setHeaderText(headerMsg);
-        alert.setContentText(contentMsg);
-        Optional<ButtonType> result = alert.showAndWait();
-    }
 
     @FXML
     private void registerBtnHandler(ActionEvent event) {
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
         try {
             if(userTextField.getText().equals("") || passPasswordField.getText().equals("")){
-                dialogue("Error", "Username or password cannot be empty!",Alert.AlertType.ERROR);
+                this.mc.dialogue("Error", "Username or password cannot be empty!",Alert.AlertType.ERROR);
             }
             else{
                   if (passPasswordField.getText().equals(rePassPasswordField.getText())) {
                       if(!this.db.validateUser(userTextField.getText())){
                         this.db.addDataToDB(userTextField.getText(), passPasswordField.getText());
-                        dialogue("Adding information to the database", "Successful!",Alert.AlertType.CONFIRMATION);
+                        this.mc.dialogue("Adding information to the database", "Successful!",Alert.AlertType.INFORMATION);
 //                        String[] credentials = {userTextField.getText(), passPasswordField.getText()};
                         String credentials=userTextField.getText();
-                        
                         this.mc.redirectUser(credentials);
 
                       }
                       else{
-                          dialogue("Error", "User already exist.",Alert.AlertType.ERROR);
+                          this.mc.dialogue("Error", "User already exist.",Alert.AlertType.ERROR);
                           return;
                       }
                     
                 } else {
-                    dialogue("Error", "password and confirm password did not match.",Alert.AlertType.ERROR);
+                    this.mc.dialogue("Error", "password and confirm password did not match.",Alert.AlertType.ERROR);
+                    return;
                 }
                 primaryStage.close();
             }

@@ -39,6 +39,9 @@ public class DB {
     private int timeout = 30;
     private String dataBaseName = "COMP20081";
     private String dataBaseTableName = "Users";
+    private String aclTableName="ACL";
+    private String filesTableName="FileMetadata";
+    private String encryptionTableName="Encryption";
     Connection connection = null;
     private Random random = new SecureRandom();
     private String characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -309,8 +312,18 @@ public class DB {
     public boolean updateUsername(String id, String newUsername) throws InvalidKeySpecException, ClassNotFoundException {
         Boolean flag = false;
         try {
-            this.executeDb("update " + dataBaseTableName + " set name="+newUsername+" where id='"+id+"'", false);
-
+            this.executeDb("update " + dataBaseTableName + " set name='"+newUsername+"' where id='"+id+"'", false);
+        }finally {
+            flag=true;
+            this.closeConnection();
+        }
+        return flag;
+    }
+    
+        public boolean deleteUser(String id) throws InvalidKeySpecException, ClassNotFoundException {
+        Boolean flag = false;
+        try {
+            this.executeDb("delete from " + dataBaseTableName + " where id='"+id+"'", false);
         }finally {
             flag=true;
             this.closeConnection();

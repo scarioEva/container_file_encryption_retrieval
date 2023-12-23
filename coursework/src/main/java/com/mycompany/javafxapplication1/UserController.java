@@ -60,17 +60,6 @@ public class UserController {
     @FXML
     private Button editProfileBtn;
     
-    private void dialogue(String headerMsg, String contentMsg,Alert.AlertType alertType) {
-        Stage secondaryStage = new Stage();
-        Group root = new Group();
-        Scene scene = new Scene(root, 300, 300, Color.DARKGRAY);
-        Alert alert = new Alert(alertType);
-        alert.setTitle(alertType == Alert.AlertType.CONFIRMATION? "Confirmation Dialog":"Error Dialog");
-        alert.setHeaderText(headerMsg);
-        alert.setContentText(contentMsg);
-        Optional<ButtonType> result = alert.showAndWait();
-    }
-    
     @FXML
     private void fileOnSave(){
         try{
@@ -80,7 +69,7 @@ public class UserController {
             
             writer.close();
             
-            dialogue("Success!", "File updated successfully!", Alert.AlertType.CONFIRMATION);
+            this.mc.dialogue("Success!", "File updated successfully!", Alert.AlertType.INFORMATION);
         }
         catch(IOException ie){
             
