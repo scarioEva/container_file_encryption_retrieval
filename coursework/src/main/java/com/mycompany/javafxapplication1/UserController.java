@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -38,6 +39,8 @@ import javafx.stage.Stage;
 public class UserController {
     private String fileName="newfile.txt";
     private String username;
+    private MainController mc=new MainController();
+    private DB db=new DB();
 
     @FXML
     private Label userLabel;
@@ -110,8 +113,6 @@ public class UserController {
     
     @FXML
     private void handleLogout(){
-        Stage secondaryStage = new Stage();
-        
         Stage primaryStage = (Stage) logoutBtn.getScene().getWindow();
         DB myObj = new DB();
         ObservableList<User> data;
@@ -120,13 +121,7 @@ public class UserController {
             data=myObj.getActiveUser();
             
             if(myObj.setUserActive(data.get(0).getUser(), false)){
-                FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(getClass().getResource("primary.fxml"));
-                Parent root = loader.load();
-                Scene scene = new Scene(root, 640, 480);
-                secondaryStage.setScene(scene);
-                secondaryStage.setTitle("Login");
-                secondaryStage.show();
+                this.mc.redirectLogin();
                 primaryStage.close();
             }
 
@@ -137,27 +132,9 @@ public class UserController {
     
     @FXML
     private void onEditProfile(){
-        try {
-            Stage editProfileStage = new Stage();
-            
-            Stage primaryStage = (Stage) editProfileBtn.getScene().getWindow();
-            FXMLLoader loader= new FXMLLoader();
-            loader.setLocation(getClass().getResource("editProfile.fxml"));
-            Parent root = loader.load();
-            Scene scene =new Scene(root, 440,280);
-            
-            EditProfileController controller = loader.getController();
-            controller.initialise(this.username);
-            
-            editProfileStage.setScene(scene);
-            editProfileStage.setTitle("Edit Profile");
-            editProfileStage.show();
-            primaryStage.close();
-            
-        } catch (IOException ex) {
-            Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
+        Stage primaryStage = (Stage) editProfileBtn.getScene().getWindow();
+        this.mc.redirectEditProfile(this.username);
+        primaryStage.close();
     }
     
     public void initialise(String credentials) {

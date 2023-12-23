@@ -6,6 +6,7 @@ package com.mycompany.javafxapplication1;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +26,9 @@ import javafx.stage.Stage;
  */
 public class EditProfileController {
     private String username;
+    private String userId;
+    private MainController mc=new MainController();
+    private DB db=new DB();
     
     @FXML
     private TextField usernameText;
@@ -36,26 +40,9 @@ public class EditProfileController {
     private Button saveBtn;
     
     private  void setUserPage(Stage stage){
-        try {
-            Stage editProfileStage = new Stage();
-            
-            Stage primaryStage = (Stage) stage;
-            FXMLLoader loader= new FXMLLoader();
-            loader.setLocation(getClass().getResource("user.fxml"));
-            Parent root = loader.load();
-            Scene scene =new Scene(root, 640,480);
-            
-            UserController controller = loader.getController();
-            controller.initialise(this.username);
-            
-            editProfileStage.setScene(scene);
-            editProfileStage.setTitle("User");
-            editProfileStage.show();
-            primaryStage.close();
-            
-        } catch (IOException ex) {
-            Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Stage primaryStage = (Stage) stage;
+        mc.redirectUser(this.username);
+        primaryStage.close();   
     }
 
     @FXML
@@ -67,11 +54,24 @@ public class EditProfileController {
     }
     
     @FXML
-    private void onSave(){}
+    private void onSave(){
+        try {
+            if(this.db.updateUsername(this.userId, usernameText.getText())){
+                setUserPage((Stage) saveBtn.getScene().getWindow());
+            }
+        } catch (InvalidKeySpecException ex) {
+            Logger.getLogger(EditProfileController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(EditProfileController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
 
-    public void initialise(String credentials) {
+    public void initialise(String credentials) throws InvalidKeySpecException, ClassNotFoundException {
         this.username=credentials;
         usernameText.setText(this.username);
+        
+        this.userId=this.db.getUserId(this.username);
 
     }
     

@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,7 +17,7 @@ import java.util.logging.Logger;
 public class App extends Application {
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws IOException, InvalidKeySpecException {
         Stage secondaryStage = new Stage();
         DB myObj = new DB();
         myObj.log("-------- Simple Tutorial on how to make JDBC connection to SQLite DB ------------");
@@ -33,13 +34,8 @@ public class App extends Application {
             Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("primary.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root, 640, 480);
-            secondaryStage.setScene(scene);
-            secondaryStage.setTitle("Primary View");
-            secondaryStage.show();
+          MainController mc= new MainController();
+          mc.redirectLogin();
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,5 +1,6 @@
 package com.mycompany.javafxapplication1;
 
+import java.security.spec.InvalidKeySpecException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,6 +26,9 @@ import javafx.stage.Stage;
 
 public class AdminController {
     
+    private MainController mc=new MainController();
+    private DB db=new DB();
+    
     @FXML
     private TextField userTextField;
     
@@ -48,22 +52,14 @@ public class AdminController {
         
     @FXML
     private void handleLogout(){
-        Stage secondaryStage = new Stage();
         Stage primaryStage = (Stage) logoutBtn.getScene().getWindow();
-        DB myObj = new DB();
         ObservableList<User> data;
         try {
             
-            data=myObj.getActiveUser();
+            data=this.db.getActiveUser();
             
-            if(myObj.setUserActive(data.get(0).getUser(), false)){
-                FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(getClass().getResource("primary.fxml"));
-                Parent root = loader.load();
-                Scene scene = new Scene(root, 640, 480);
-                secondaryStage.setScene(scene);
-                secondaryStage.setTitle("Login");
-                secondaryStage.show();
+            if(this.db.setUserActive(data.get(0).getUser(), false)){
+                this.mc.redirectLogin();
                 primaryStage.close();
             }
 
@@ -74,10 +70,9 @@ public class AdminController {
 
     public void initialise(String credentials) {
         userTextField.setText(credentials);
-        DB myObj = new DB();
         ObservableList<User> data;
         try {
-            data = myObj.getDataFromTable();
+            data = this.db.getDataFromTable();
 //            data = myObj.getActiveUser();
 
             TableColumn user = new TableColumn("User");
@@ -90,6 +85,8 @@ public class AdminController {
             dataTableView.setItems(data);
             dataTableView.getColumns().addAll(user, pass);
         } catch (ClassNotFoundException ex) {
+            Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidKeySpecException ex) {
             Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

@@ -67,77 +67,29 @@ public class DB {
             e.printStackTrace();
         }
     }
-        
-    /**
-     * @brief create a new table
-     * @param tableName name of type String
-     */
-    public void createTable(String tableName) throws ClassNotFoundException {
+    
+    private ResultSet executeDb(String query, Boolean resultSet ) throws InvalidKeySpecException, ClassNotFoundException {
+        ResultSet rs=null;
         try {
-            // create a database connection
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection(fileName);
             var statement = connection.createStatement();
             statement.setQueryTimeout(timeout);
-            statement.executeUpdate("create table if not exists " + tableName + "(id integer primary key autoincrement, name string, password string, active boolean)");
-
-        } catch (SQLException ex) {
-            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                // connection close failed.
-                System.err.println(e.getMessage());
+            
+            if(resultSet){
+                rs=statement.executeQuery(query);
             }
-        }
-    }
-
-    /**
-     * @brief delete table
-     * @param tableName of type String
-     */
-    public void delTable(String tableName) throws ClassNotFoundException {
-        try {
-            // create a database connection
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection(fileName);
-            var statement = connection.createStatement();
-            statement.setQueryTimeout(timeout);
-            statement.executeUpdate("drop table if exists " + tableName);
+            else
+                statement.executeUpdate(query);
+            
         } catch (SQLException ex) {
             Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                // connection close failed.
-                System.err.println(e.getMessage());
-            }
-        }
+        } 
+        return rs;
     }
-
-    /**
-     * @brief add data to the database method
-     * @param user name of type String
-     * @param password of type String
-     */
-        public void addDataToDB(String user, String password) throws InvalidKeySpecException, ClassNotFoundException {
+    
+    private void closeConnection(){
         try {
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection(fileName);
-            var statement = connection.createStatement();
-            statement.setQueryTimeout(timeout);
-//            System.out.println("Adding User: " + user + ", Password: " + password);
-            statement.executeUpdate("insert into " + dataBaseTableName + " (name, password, active) values('" + user + "','" + generateSecurePassword(password) + "', true)");
-        } catch (SQLException ex) {
-            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
                 if (connection != null) {
                     connection.close();
                 }
@@ -153,37 +105,54 @@ public class DB {
                     System.err.println(e.getMessage());
                 }
             }
-        }
+    }
+        
+    /**
+     * @brief create a new table
+     * @param tableName name of type String
+     */
+    public void createTable(String tableName) throws InvalidKeySpecException, ClassNotFoundException {
+        this.executeDb("create table if not exists " + tableName + "(id integer primary key autoincrement, name string, password string, active boolean)", false);
+        this.closeConnection();
+    }
+
+    /**
+     * @brief delete table
+     * @param tableName of type String
+     */
+    public void delTable(String tableName) throws ClassNotFoundException, InvalidKeySpecException {
+        this.executeDb("drop table if exists " + tableName, false);
+        this.closeConnection();
+    }
+
+    /**
+     * @brief add data to the database method
+     * @param user name of type String
+     * @param password of type String
+     */
+    public void addDataToDB(String user, String password) throws InvalidKeySpecException, ClassNotFoundException {
+        this.executeDb("insert into " + dataBaseTableName + " (name, password, active) values('" + user + "','" + generateSecurePassword(password) + "', true)", false);
+        this.closeConnection();
     }
 
     /**
      * @brief get data from the Database method
      * @retunr results as ResultSet
      */
-    public ObservableList<User> getDataFromTable() throws ClassNotFoundException {
+    public ObservableList<User> getDataFromTable() throws ClassNotFoundException, InvalidKeySpecException {
         ObservableList<User> result = FXCollections.observableArrayList();
         try {
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection(fileName);
-            var statement = connection.createStatement();
-            statement.setQueryTimeout(timeout);
-            ResultSet rs = statement.executeQuery("select * from " + this.dataBaseTableName);
+            ResultSet rs=this.executeDb("select * from " + this.dataBaseTableName, true);
+
             while (rs.next()) {
                 // read the result set
                 result.add(new User(rs.getString("name"),rs.getString("password")));
             }
-            
         } catch (SQLException ex) {
             Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                // connection close failed.
-                System.err.println(e.getMessage());
-            }
+        }
+        finally{
+            this.closeConnection();
         }
         return result;
     }
@@ -198,13 +167,10 @@ public class DB {
  
         Boolean flag = false;
         try {
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection(fileName);
-            var statement = connection.createStatement();
-            statement.setQueryTimeout(timeout);
-            ResultSet rs = statement.executeQuery("select name, password from " + this.dataBaseTableName);
+            ResultSet rs=this.executeDb("select name, password from " + this.dataBaseTableName, true);
+
             String inPass = generateSecurePassword(pass);
-            // Let's iterate through the java ResultSet
+            
             while (rs.next()) {
                 if (user.equals(rs.getString("name")) && rs.getString("password").equals(inPass)) {
                     flag = true;
@@ -213,29 +179,19 @@ public class DB {
             }
         } catch (SQLException ex) {
             Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                // connection close failed.
-                System.err.println(e.getMessage());
-            }
+        } 
+        finally{
+            this.closeConnection();
         }
-
+        
         return flag;
     }
     
     public boolean validateUser(String user) throws InvalidKeySpecException, ClassNotFoundException {
         Boolean flag = false;
         try {
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection(fileName);
-            var statement = connection.createStatement();
-            statement.setQueryTimeout(timeout);
-            ResultSet rs = statement.executeQuery("select name from " + this.dataBaseTableName);
-            // Let's iterate through the java ResultSet
+            ResultSet rs=this.executeDb("select name, password from " + this.dataBaseTableName, true);
+
             while (rs.next()) {
                 if (user.toLowerCase().equals(rs.getString("name").toLowerCase())) {
                     flag = true;
@@ -244,17 +200,11 @@ public class DB {
             }
         } catch (SQLException ex) {
             Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                // connection close failed.
-                System.err.println(e.getMessage());
-            }
+        } 
+        finally{
+            this.closeConnection();
         }
-
+        
         return flag;
     }
 
@@ -309,92 +259,62 @@ public class DB {
 
     }
     
-    public ObservableList<User> getActiveUser() throws ClassNotFoundException {
+    public ObservableList<User> getActiveUser() throws ClassNotFoundException, InvalidKeySpecException {
         ObservableList<User> result = FXCollections.observableArrayList();
         try {
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection(fileName);
-            var statement = connection.createStatement();
-            statement.setQueryTimeout(timeout);
-            ResultSet rs = statement.executeQuery("select * from " + this.dataBaseTableName+ " where active=true");
+             ResultSet rs=this.executeDb("select * from " + this.dataBaseTableName+ " where active=true", true);
             while (rs.next()) {
                 result.add(new User(rs.getString("name"),rs.getString("password")));
             }
             
         } catch (SQLException ex) {
             Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                // connection close failed.
-                System.err.println(e.getMessage());
-            }
         }
+        finally{
+            this.closeConnection();
+        }
+        
         return result;
     }
     
     public boolean setUserActive(String user, boolean active) throws InvalidKeySpecException, ClassNotFoundException {
         Boolean flag = false;
         try {
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection(fileName);
-            var statement = connection.createStatement();
-            statement.setQueryTimeout(timeout);
-            statement.executeUpdate("update " + dataBaseTableName + " set active="+active+" where name='"+user+"'");
-        } catch (SQLException ex) {
-            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (connection != null) {
-                    flag=true;
-                    connection.close();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                try {
-                    if (connection != null) {
-                        flag=true;
-                        connection.close();
-                    }
-                } catch (SQLException e) {
-                    // connection close failed.
-                    System.err.println(e.getMessage());
-                }
-            }
-        }
+            this.executeDb("update " + dataBaseTableName + " set active="+active+" where name='"+user+"'", false);
 
+        }finally {
+            flag=true;
+            this.closeConnection();
+        }
         return flag;
     }
-//    public static void main(String[] args) throws InvalidKeySpecException {
-//        DB myObj = new DB();
-//        myObj.log("-------- Simple Tutorial on how to make JDBC connection to SQLite DB ------------");
-//        myObj.log("\n---------- Drop table ----------");
-//        myObj.delTable(myObj.getTableName());
-//        myObj.log("\n---------- Create table ----------");
-//        myObj.createTable(myObj.getTableName());
-//        myObj.log("\n---------- Adding Users ----------");
-//        myObj.addDataToDB("ntu-user", "12z34");
-//        myObj.addDataToDB("ntu-user2", "12yx4");
-//        myObj.addDataToDB("ntu-user3", "a1234");
-//        myObj.log("\n---------- get Data from the Table ----------");
-//        myObj.getDataFromTable(myObj.getTableName());
-//        myObj.log("\n---------- Validate users ----------");
-//        String[] users = new String[]{"ntu-user", "ntu-user", "ntu-user1"};
-//        String[] passwords = new String[]{"12z34", "1235", "1234"};
-//        String[] messages = new String[]{"VALID user and password",
-//            "VALID user and INVALID password", "INVALID user and VALID password"};
-//
-//        for (int i = 0; i < 3; i++) {
-//            System.out.println("Testing " + messages[i]);
-//            if (myObj.validateUser(users[i], passwords[i], myObj.getTableName())) {
-//                myObj.log("++++++++++VALID credentials!++++++++++++");
-//            } else {
-//                myObj.log("----------INVALID credentials!----------");
-//            }
-//        }
-//    }
+    
+    public String getUserId(String user) throws InvalidKeySpecException, ClassNotFoundException{
+        String id="";
+        try{
+         ResultSet rs=this.executeDb("select id from "+this.dataBaseTableName+" where name='"+user+"'", true);
+         while(rs.next()){
+                id=rs.getString("id");
+            }
+        }
+        catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally{
+            this.closeConnection();
+        }
+        return id;
+    }
+    
+    public boolean updateUsername(String id, String newUsername) throws InvalidKeySpecException, ClassNotFoundException {
+        Boolean flag = false;
+        try {
+            this.executeDb("update " + dataBaseTableName + " set name="+newUsername+" where id='"+id+"'", false);
+
+        }finally {
+            flag=true;
+            this.closeConnection();
+        }
+        return flag;
+    }
 }

@@ -30,7 +30,9 @@ import javafx.stage.Stage;
  * @author ntu-user
  */
 public class RegisterController {
-
+    private MainController mc=new MainController();
+    private DB db=new DB();
+    
     /**
      * Initializes the controller class.
      */
@@ -86,30 +88,21 @@ public class RegisterController {
 
     @FXML
     private void registerBtnHandler(ActionEvent event) {
-        Stage secondaryStage = new Stage();
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
         try {
-            FXMLLoader loader = new FXMLLoader();
-            DB myObj = new DB();
             if(userTextField.getText().equals("") || passPasswordField.getText().equals("")){
                 dialogue("Error", "Username or password cannot be empty!",Alert.AlertType.ERROR);
             }
             else{
                   if (passPasswordField.getText().equals(rePassPasswordField.getText())) {
-                      if(!myObj.validateUser(userTextField.getText())){
-                        myObj.addDataToDB(userTextField.getText(), passPasswordField.getText());
+                      if(!this.db.validateUser(userTextField.getText())){
+                        this.db.addDataToDB(userTextField.getText(), passPasswordField.getText());
                         dialogue("Adding information to the database", "Successful!",Alert.AlertType.CONFIRMATION);
 //                        String[] credentials = {userTextField.getText(), passPasswordField.getText()};
                         String credentials=userTextField.getText();
-                        loader.setLocation(getClass().getResource("user.fxml"));
-                        Parent root = loader.load();
-                        Scene scene = new Scene(root, 640, 480);
-                        secondaryStage.setScene(scene);
-                        UserController controller = loader.getController();
-                        secondaryStage.setTitle("Show users");
-                        controller.initialise(credentials);
-                        String msg = "some data sent from Register Controller";
-                        secondaryStage.setUserData(msg);
+                        
+                        this.mc.redirectUser(credentials);
+
                       }
                       else{
                           dialogue("Error", "User already exist.",Alert.AlertType.ERROR);
@@ -118,13 +111,7 @@ public class RegisterController {
                     
                 } else {
                     dialogue("Error", "password and confirm password did not match.",Alert.AlertType.ERROR);
-                    loader.setLocation(getClass().getResource("register.fxml"));
-                    Parent root = loader.load();
-                    Scene scene = new Scene(root, 640, 480);
-                    secondaryStage.setScene(scene);
-                    secondaryStage.setTitle("Register a new User");
                 }
-                secondaryStage.show();
                 primaryStage.close();
             }
             
@@ -136,16 +123,9 @@ public class RegisterController {
 
     @FXML
     private void backLoginBtnHandler(ActionEvent event) {
-        Stage secondaryStage = new Stage();
         Stage primaryStage = (Stage) backLoginBtn.getScene().getWindow();
         try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("primary.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root, 640, 480);
-            secondaryStage.setScene(scene);
-            secondaryStage.setTitle("Login");
-            secondaryStage.show();
+            this.mc.redirectLogin();
             primaryStage.close();
 
         } catch (Exception e) {

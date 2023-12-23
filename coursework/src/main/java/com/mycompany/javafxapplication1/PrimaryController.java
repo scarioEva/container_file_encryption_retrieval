@@ -19,7 +19,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 
 public class PrimaryController {
-
+    private MainController mc=new MainController();
+    private DB db=new DB();
+    
     @FXML
     private Button registerBtn;
 
@@ -33,15 +35,8 @@ public class PrimaryController {
     private void registerBtnHandler(ActionEvent event) {
         Stage secondaryStage = new Stage();
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
-        DB myObj = new DB();
         try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("register.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root, 640, 480);
-            secondaryStage.setScene(scene);
-            secondaryStage.setTitle("Register a new User");
-            secondaryStage.show();
+            this.mc.redirectRegister();
             primaryStage.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -63,49 +58,11 @@ public class PrimaryController {
     
     
     private void userLogin(String credentials){
-        Stage secondaryStage = new Stage();
-        try{
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("user.fxml"));
-            Parent root = loader.load();
-            
-            Scene scene = new Scene(root, 640, 480);
-            secondaryStage.setScene(scene);
-            
-            UserController controller = loader.getController();
-            controller.initialise(credentials);
- 
-            secondaryStage.setTitle("User");
-            String msg="some data sent from Primary Controller";
-            secondaryStage.setUserData(msg);
-            secondaryStage.show();
-        }
-        catch(IOException e){
-            e.printStackTrace();
-        }
+        this.mc.redirectUser(credentials);
     }
     
     private void adminLogin(String credentials){
-        Stage secondaryStage = new Stage();
-        try{
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("admin.fxml"));
-            Parent root = loader.load();
-            
-            Scene scene = new Scene(root, 640, 480);
-            secondaryStage.setScene(scene);
-            
-            AdminController controller = loader.getController();
-            controller.initialise(credentials);
- 
-            secondaryStage.setTitle("Show Users");
-            String msg="some data sent from Primary Controller";
-            secondaryStage.setUserData(msg);
-            secondaryStage.show();
-        }
-        catch(IOException e){
-            e.printStackTrace();
-        }
+        this.mc.redirectAdmin(credentials);
     }
 
     @FXML
