@@ -30,6 +30,9 @@ public class App extends Application {
         myObj.log("\n---------- Create table ----------");
         try {
             myObj.createTable(myObj.getTableName());
+            myObj.createFilesTable();
+            myObj.createACLsTable();
+
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         }

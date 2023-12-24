@@ -28,6 +28,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -41,64 +42,34 @@ public class UserController {
     private String username;
     private MainController mc=new MainController();
     private DB db=new DB();
+    
 
     @FXML
     private Label userLabel;
-    
-    @FXML
-    private Label fileLabel;
-    
+       
     @FXML
     private Button logoutBtn;
-    
-    @FXML
-    private TextArea fileTextArea;
-    
-    @FXML
-    private Button saveFile;
     
     @FXML
     private Button editProfileBtn;
     
     @FXML
-    private void fileOnSave(){
-        try{
-            String str = fileTextArea.getText();
-            FileWriter writer = new FileWriter(fileName);
-            writer.write(str);
-            
-            writer.close();
-            
-            this.mc.dialogue("Success!", "File updated successfully!", Alert.AlertType.INFORMATION);
-        }
-        catch(IOException ie){
-            
-        }
-    }
+    private Button fileCreate;
     
-    private void getFileData(){
-        try{
-            File file=new File(fileName);
-            fileLabel.setText(file.getName());
-
-            FileReader fileReader =new FileReader(fileName);
-            var bufferReader = new BufferedReader(fileReader);
-            
-            String fileData=null;
-            
-            while((fileData= bufferReader.readLine())!=null){
-                fileTextArea.setText(fileData);
-            }
-            
-        }
-        catch(FileNotFoundException fe){
-           
-        }
-        catch(IOException ie){
-            
-        }
-        
-    }
+    @FXML
+    private Button userEditFlBtn;
+    
+    @FXML
+    private Button userDelFlBtn;
+    
+    @FXML
+    private Button sharedFlEditBtn;
+    
+    @FXML
+    private Label userFileName;
+    
+    @FXML
+    private Label sharedFileName;
     
     @FXML
     private void handleLogout(){
@@ -122,13 +93,69 @@ public class UserController {
     @FXML
     private void onEditProfile(){
         Stage primaryStage = (Stage) editProfileBtn.getScene().getWindow();
-        this.mc.redirectEditProfile(this.username);
+        String[] data={this.username};
+        this.mc.redirectEditProfile(data);
         primaryStage.close();
     }
     
-    public void initialise(String credentials) {
-        this.username=credentials;
+    @FXML
+    private void onFileCreate(){
+        Stage primaryStage = (Stage) fileCreate.getScene().getWindow();
+        String[] data={this.username};
+        this.mc.redirectFile(data, "Create File");
+        primaryStage.close();
+    }
+    
+    @FXML
+    private void onUserFlDel(){
+        
+    }
+    
+    @FXML
+    private void onUserFileEdit(){
+        
+    }
+    
+    @FXML
+    private void onSharedFileEdit(){
+        
+    }
+    
+    private void getFileData(){
+        ObservableList<FileData> data;
+        
+        try {
+            String userId= db.getUserId(this.username);
+            data = this.db.getFileFromTable(userId);
+            System.out.println(data.size());
+            
+            if(!data.isEmpty()){
+                userFileName.setText(data.get(0).getFilaName()+".txt");
+                userDelFlBtn.setVisible(true);
+                userEditFlBtn.setVisible(true);
+                fileCreate.setVisible(false);
+            }
+            else{
+                userFileName.setText("No file created");
+                userDelFlBtn.setVisible(false);
+                userEditFlBtn.setVisible(false);
+                fileCreate.setVisible(true);
+            }
+            
+                
+        } catch (InvalidKeySpecException ex) {
+            Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void initialise(String credentials[]) {
+        this.username=credentials[0];
         userLabel.setText(this.username);
+        
+        
+//        userEditFlBtn.setVisible(false);
         getFileData();
     }
     

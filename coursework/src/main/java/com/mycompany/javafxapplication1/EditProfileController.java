@@ -45,7 +45,8 @@ public class EditProfileController {
     
     private  void setUserPage(Stage stage){
         Stage primaryStage = (Stage) stage;
-        mc.redirectUser(this.username);
+        String[] data= {this.username};
+        mc.redirectUser(data);
         primaryStage.close();   
     }
 
@@ -100,8 +101,8 @@ public class EditProfileController {
         }
     }
 
-    public void initialise(String credentials) throws InvalidKeySpecException, ClassNotFoundException {
-        this.username=credentials;
+    public void initialise(String[] credentials) throws InvalidKeySpecException, ClassNotFoundException {
+        this.username=credentials[0];
         usernameText.setText(this.username);
         this.userId=this.db.getUserId(this.username);
     }

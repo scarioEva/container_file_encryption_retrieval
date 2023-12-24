@@ -68,8 +68,8 @@ public class AdminController {
         }
     }
 
-    public void initialise(String credentials) {
-        userTextField.setText(credentials);
+    public void initialise(String[] credentials) {
+        userTextField.setText(credentials[0]);
         ObservableList<User> data;
         try {
             data = this.db.getDataFromTable();

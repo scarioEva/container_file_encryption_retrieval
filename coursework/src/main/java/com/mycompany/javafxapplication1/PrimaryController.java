@@ -46,11 +46,11 @@ public class PrimaryController {
 
     
     
-    private void userLogin(String credentials){
+    private void userLogin(String[] credentials){
         this.mc.redirectUser(credentials);
     }
     
-    private void adminLogin(String credentials){
+    private void adminLogin(String[] credentials){
         this.mc.redirectAdmin(credentials);
     }
 
@@ -61,7 +61,7 @@ public class PrimaryController {
         try {
             DB myObj = new DB();
 //            String[] credentials = {userTextField.getText(), passPasswordField.getText()};
-            String credentials=userTextField.getText();
+            String[] credentials={userTextField.getText()};
             if(myObj.validateUser(userTextField.getText(), passPasswordField.getText())){
                 
                 myObj.setUserActive(userTextField.getText(), true);
