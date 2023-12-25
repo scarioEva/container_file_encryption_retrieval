@@ -118,7 +118,16 @@ public class DB {
         this.executeDb("create table if not exists " + tableName + "(id integer primary key autoincrement, name string, password string, active boolean)", false);
         this.closeConnection();
     }
+    
+    public void createFilesTable() throws InvalidKeySpecException, ClassNotFoundException {
+        this.executeDb("create table if not exists " + this.filesTableName + "(id integer primary key autoincrement, name string, userId String, size string, path string)", false);
+        this.closeConnection();
+    }
 
+    public void createACLsTable() throws InvalidKeySpecException, ClassNotFoundException {
+        this.executeDb("create table if not exists " + this.aclTableName + "(id integer primary key autoincrement, fileId string, userId String, read boolean, write boolean)", false);
+        this.closeConnection();
+    }
     /**
      * @brief delete table
      * @param tableName of type String
@@ -133,7 +142,7 @@ public class DB {
      * @param user name of type String
      * @param password of type String
      */
-    public void addDataToDB(String user, String password) throws InvalidKeySpecException, ClassNotFoundException {
+    public void addUserDataToDB(String user, String password) throws InvalidKeySpecException, ClassNotFoundException {
         this.executeDb("insert into " + dataBaseTableName + " (name, password, active) values('" + user + "','" + generateSecurePassword(password) + "', true)", false);
         this.closeConnection();
     }
@@ -292,12 +301,13 @@ public class DB {
         return flag;
     }
     
-    public String getUserId(String user) throws InvalidKeySpecException, ClassNotFoundException{
-        String id="";
+    public String getUser(String value, String key, String result) throws InvalidKeySpecException, ClassNotFoundException{
+        String output="";
         try{
-         ResultSet rs=this.executeDb("select id from "+this.dataBaseTableName+" where name='"+user+"'", true);
-         while(rs.next()){
-                id=rs.getString("id");
+            System.out.println("select "+result+" from "+this.dataBaseTableName+" where "+key+"='"+value+"'");
+            ResultSet rs=this.executeDb("select "+result+" from "+this.dataBaseTableName+" where "+key+"='"+value+"'", true);
+            while(rs.next()){
+                output=rs.getString(result);
             }
         }
         catch (SQLException ex) {
@@ -306,7 +316,7 @@ public class DB {
         finally{
             this.closeConnection();
         }
-        return id;
+        return output;
     }
     
     public boolean updateUsername(String id, String newUsername) throws InvalidKeySpecException, ClassNotFoundException {
@@ -320,7 +330,7 @@ public class DB {
         return flag;
     }
     
-        public boolean deleteUser(String id) throws InvalidKeySpecException, ClassNotFoundException {
+    public boolean deleteUser(String id) throws InvalidKeySpecException, ClassNotFoundException {
         Boolean flag = false;
         try {
             this.executeDb("delete from " + dataBaseTableName + " where id='"+id+"'", false);
@@ -329,5 +339,34 @@ public class DB {
             this.closeConnection();
         }
         return flag;
+    }
+    
+    public void addFileDataToDB(String userId, String fileName, String path, String size) throws InvalidKeySpecException, ClassNotFoundException {
+        this.executeDb("insert into " + filesTableName + " (name, userId, size, path) values('" + fileName + "','" + userId + "','"+size+"','"+path+"')", false);
+        this.closeConnection();
+    }
+    
+    public ObservableList<FileData> getFileFromTable(String value, String key) throws ClassNotFoundException, InvalidKeySpecException {
+        ObservableList<FileData> result = FXCollections.observableArrayList();
+        try {
+            ResultSet rs=this.executeDb("select * from " + this.filesTableName+ " where "+key+"='"+value+"'", true);
+
+            while (rs.next()) {
+                // read the result set
+                result.add(new FileData(rs.getString("name"),rs.getString("path"),rs.getString("id"), rs.getString("userId")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally{
+            this.closeConnection();
+        }
+        return result;
+    }
+    
+    public void updateFileData(String fileId, String fileName, String size) throws InvalidKeySpecException, ClassNotFoundException {
+//        System.out.println("update "+filesTableName+ " set name='"+fileName+"', size='"+size+"' where id='"+"fileId'");
+        this.executeDb("update "+filesTableName+ " set name='"+fileName+"', size='"+size+"' where id='"+fileId+"'", false);
+        this.closeConnection();
     }
 }

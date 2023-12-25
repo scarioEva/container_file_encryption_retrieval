@@ -23,8 +23,8 @@ import javafx.stage.Stage;
  * @author ntu-user
  */
 public class MainController {
-    
-    private void openView(int width, int height, String fileName, String title,String credentials){
+    private String[] emptyArray={};
+    private void openView(int width, int height, String fileName, String title,String[] data){
         Stage secondaryStage = new Stage();
 
         try {
@@ -33,21 +33,25 @@ public class MainController {
             Parent root = loader.load();
             Scene scene = new Scene(root, width, height);
             secondaryStage.setScene(scene);
-            if(!credentials.equals("")){
+//            if(!data.equals("")){
                 if(fileName=="admin.fxml"){
                     AdminController controller = loader.getController();
-                    controller.initialise(credentials);
+                    controller.initialise(data);
                 }
                 else if(fileName=="user.fxml"){
                     UserController controller = loader.getController();
-                    controller.initialise(credentials);
+                    controller.initialise(data);
                 }
                 else if(fileName=="editProfile.fxml"){
                     EditProfileController controller = loader.getController();
-                    controller.initialise(credentials);
+                    controller.initialise(data);
+                }
+                else if(fileName=="file.fxml"){
+                    FileController controller = loader.getController();
+                    controller.initialise(data);
                 }
                 
-            }
+//            }
             secondaryStage.setTitle(title);
             secondaryStage.show();
             
@@ -59,7 +63,7 @@ public class MainController {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } 
     }
     
     public String dialogue(String headerMsg, String contentMsg,Alert.AlertType alertType) {
@@ -75,22 +79,26 @@ public class MainController {
     }
     
     public void redirectLogin(){
-        this.openView(640,480,"primary.fxml","Login","");
+        this.openView(640,480,"primary.fxml","Login",this.emptyArray);
     }
     
     public void redirectRegister(){
-        this.openView(640,480,"register.fxml","Register a new User","");
+        this.openView(640,480,"register.fxml","Register a new User",this.emptyArray);
     }
     
-    public void redirectAdmin(String credentials){
+    public void redirectAdmin(String[] credentials){
        this.openView(640,480,"admin.fxml","Admin", credentials);
     }
     
-    public void redirectUser(String credentials){
+    public void redirectUser(String[] credentials){
         this.openView(640,480,"user.fxml","User",credentials);
     }
     
-    public void redirectEditProfile(String credentials){
+    public void redirectEditProfile(String[] credentials){
         this.openView(640,480,"editProfile.fxml","Edit Profile",credentials);
+    }
+    
+    public void redirectFile(String[] data, String title){
+        this.openView(640,480,"file.fxml",title,data);
     }
 }

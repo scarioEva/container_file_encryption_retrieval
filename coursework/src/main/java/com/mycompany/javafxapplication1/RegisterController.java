@@ -86,10 +86,10 @@ public class RegisterController {
             else{
                   if (passPasswordField.getText().equals(rePassPasswordField.getText())) {
                       if(!this.db.validateUser(userTextField.getText())){
-                        this.db.addDataToDB(userTextField.getText(), passPasswordField.getText());
+                        this.db.addUserDataToDB(userTextField.getText(), passPasswordField.getText());
                         this.mc.dialogue("Adding information to the database", "Successful!",Alert.AlertType.INFORMATION);
 //                        String[] credentials = {userTextField.getText(), passPasswordField.getText()};
-                        String credentials=userTextField.getText();
+                        String[] credentials={userTextField.getText()};
                         this.mc.redirectUser(credentials);
 
                       }
