@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.security.spec.InvalidKeySpecException;
+import java.util.LinkedList;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +19,8 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -38,6 +41,7 @@ public class FileController{
     private DB db=new DB();
     private String fileId;
     private String filePath;
+    private ACLManagment acl=new ACLManagment();
 
     @FXML
     private TextArea fileTextArea;
@@ -62,6 +66,19 @@ public class FileController{
     private GridPane test;
     
     @FXML
+    private GridPane shareContainer;
+    
+    @FXML
+    private ChoiceBox userSelect;
+    
+    @FXML
+    private CheckBox readCheckbox;
+    
+    @FXML
+    private CheckBox writeCheckbox;
+    
+    
+    @FXML
     private void onSave(){
         Stage primaryStage = (Stage) fileSaveId.getScene().getWindow();
         
@@ -77,6 +94,10 @@ public class FileController{
         }
         else{
             fileManage.updatFile(this.fileId,fileName, this.filePath, fileContent);
+        }
+        
+        if(userFile){
+            
         }
     }
     
@@ -94,7 +115,6 @@ public class FileController{
     }
     
     private void getFileContent(String fileName){
-        System.out.println(fileName);
         try{
             FileManagment fm = new FileManagment();
             FileReader fileReader =new FileReader(fm.fileDirectory+fileName);
@@ -148,9 +168,36 @@ public class FileController{
             }
         
     }
+    
+    private void getUserData(){
+        try {
+            ObservableList<User> data;
+            data=this.db.getUserList();
+            if(!data.isEmpty()){
+                System.out.println(data.get(0).getUser());
+                System.out.println(data.get(1).getUser()); 
+                System.out.println(data.size());
+                
+                LinkedList<String> userData=new LinkedList();
+                
+                for(int i=0; i<data.size();i++){
+                    userData.add(data.get(i).getUser());
+                }
+
+//                ((ChoiceBox)userSelect).setItems(userData);
+                 userSelect.getItems().addAll(userData);
+
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(FileController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidKeySpecException ex) {
+            Logger.getLogger(FileController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     public void initialise(String[] data) {
         this.username=data[0];
         this.getFileData(data);
+        this.getUserData();
     }
 }

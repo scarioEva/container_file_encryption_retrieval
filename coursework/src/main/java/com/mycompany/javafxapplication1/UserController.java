@@ -132,7 +132,6 @@ public class UserController {
         
         try {
             String userId= db.getUser(this.username,"name","id");
-            System.out.println(userId);
             data = this.db.getFileFromTable(userId,"userId");
             
             if(!data.isEmpty()){
