@@ -4,8 +4,17 @@
  */
 package com.mycompany.javafxapplication1;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -24,6 +33,11 @@ public class FileController{
     private String username;
     private MainController mc=new MainController();
     private FileManagment fileManage=new FileManagment();
+    private Boolean createMode=true;
+    private Boolean userFile=true;
+    private DB db=new DB();
+    private String fileId;
+    private String filePath;
 
     @FXML
     private TextArea fileTextArea;
@@ -54,23 +68,16 @@ public class FileController{
         String fileName=fileNameId.getText();
         String fileContent=fileTextArea.getText();
 
-        if(fileManage.createNewFile(this.username, fileName, fileContent)){
-            String[] data ={this.username};
-            mc.redirectUser(data);
-            primaryStage.close();
+        if(createMode){
+            if(fileManage.createNewFile(this.username, fileName, fileContent)){
+                String[] data ={this.username};
+                mc.redirectUser(data);
+                primaryStage.close();
+            }
         }
-//        try{
-//            String str = fileTextArea.getText();
-//            FileWriter writer = new FileWriter(fileName);
-//            writer.write(str);
-//            
-//            writer.close();
-//            
-//            this.mc.dialogue("Success!", "File updated successfully!", Alert.AlertType.INFORMATION);
-//        }
-//        catch(IOException ie){
-//            
-//        }
+        else{
+            fileManage.updatFile(this.fileId,fileName, this.filePath, fileContent);
+        }
     }
     
     @FXML
@@ -86,31 +93,64 @@ public class FileController{
         
     }
     
-//    private void getFileData(){
-//        try{
-//            File file=new File(fileName);
-//            fileLabel.setText(file.getName());
-//
-//            FileReader fileReader =new FileReader(fileName);
-//            var bufferReader = new BufferedReader(fileReader);
-//            
-//            String fileData=null;
-//            
-//            while((fileData= bufferReader.readLine())!=null){
-//                fileTextArea.setText(fileData);
-//            }
-//            
-//        }
-//        catch(FileNotFoundException fe){
-//           
-//        }
-//        catch(IOException ie){
-//            
-//        }
-//        
-//    }
+    private void getFileContent(String fileName){
+        System.out.println(fileName);
+        try{
+            FileManagment fm = new FileManagment();
+            FileReader fileReader =new FileReader(fm.fileDirectory+fileName);
+            var bufferReader = new BufferedReader(fileReader);
+            
+            String fileData;
+            
+            while((fileData= bufferReader.readLine())!=null){
+                fileTextArea.setText(fileData);
+            }
+            fileReader.close();
+            
+        }
+        catch(FileNotFoundException fe){
+           
+        }
+        catch(IOException ie){
+            
+        }
+        
+    }
+    
+    
+    private void getFileData(String[] fileData){
+            this.fileId=fileData[1];
+            this.createMode=!fileData[2].equals("false");
+            this.userFile=fileData[3].equals("yes");
+            
+            ObservableList<FileData> data;
+            try {
+                if(!this.createMode){
+                    data = this.db.getFileFromTable(this.fileId,"id");
+                        if(!data.isEmpty()){
+                            fileNameId.setText(data.get(0).getFilaName());
+                            this.filePath=data.get(0).getPath();
+                            this.getFileContent(this.filePath);
+                            
+                            String ownerName=this.db.getUser(data.get(0).getUserId(),"id","name");
+                            
+                            ownerNameId.setText(ownerName);
+                        }
 
-    public void initialise(String[] credentials) {
-        this.username=credentials[0];
+                }
+                else{
+                    ownerNameId.setText(this.username);
+                }
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(FileController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidKeySpecException ex) {
+                Logger.getLogger(FileController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        
+    }
+
+    public void initialise(String[] data) {
+        this.username=data[0];
+        this.getFileData(data);
     }
 }

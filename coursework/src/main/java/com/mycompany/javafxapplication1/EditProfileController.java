@@ -104,6 +104,6 @@ public class EditProfileController {
     public void initialise(String[] credentials) throws InvalidKeySpecException, ClassNotFoundException {
         this.username=credentials[0];
         usernameText.setText(this.username);
-        this.userId=this.db.getUserId(this.username);
+        this.userId=this.db.getUser(this.username, "name","id");
     }
 }

@@ -42,6 +42,9 @@ public class UserController {
     private String username;
     private MainController mc=new MainController();
     private DB db=new DB();
+    private String userFileId;
+    private String sharedFileId;
+
     
 
     @FXML
@@ -101,7 +104,7 @@ public class UserController {
     @FXML
     private void onFileCreate(){
         Stage primaryStage = (Stage) fileCreate.getScene().getWindow();
-        String[] data={this.username};
+        String[] data={this.username,"","true","yes"};
         this.mc.redirectFile(data, "Create File");
         primaryStage.close();
     }
@@ -113,7 +116,10 @@ public class UserController {
     
     @FXML
     private void onUserFileEdit(){
-        
+        Stage primaryStage = (Stage) userEditFlBtn.getScene().getWindow();
+        String[] data={this.username,this.userFileId,"false", "yes"};
+        this.mc.redirectFile(data, "Edit file");
+        primaryStage.close();
     }
     
     @FXML
@@ -125,15 +131,16 @@ public class UserController {
         ObservableList<FileData> data;
         
         try {
-            String userId= db.getUserId(this.username);
-            data = this.db.getFileFromTable(userId);
-            System.out.println(data.size());
+            String userId= db.getUser(this.username,"name","id");
+            System.out.println(userId);
+            data = this.db.getFileFromTable(userId,"userId");
             
             if(!data.isEmpty()){
                 userFileName.setText(data.get(0).getFilaName()+".txt");
                 userDelFlBtn.setVisible(true);
                 userEditFlBtn.setVisible(true);
                 fileCreate.setVisible(false);
+                this.userFileId=data.get(0).getFileId();
             }
             else{
                 userFileName.setText("No file created");
@@ -156,7 +163,7 @@ public class UserController {
         
         
 //        userEditFlBtn.setVisible(false);
-        getFileData();
+        this.getFileData();
     }
     
 }

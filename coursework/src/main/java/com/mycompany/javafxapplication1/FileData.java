@@ -14,16 +14,16 @@ import javafx.beans.property.SimpleStringProperty;
 public class FileData {
     private SimpleStringProperty fileName;
     private SimpleStringProperty path;
-    private SimpleIntegerProperty fileId;
+    private SimpleStringProperty fileId;
     private SimpleStringProperty userId;
 
     
     
-    FileData(String fileName, String path, int fileId, String userId) {
+    FileData(String fileName, String path, String fileId, String userId) {
         this.fileName = new SimpleStringProperty(fileName);
         this.path = new SimpleStringProperty(path);
         this.userId = new SimpleStringProperty(userId);
-        this.fileId=new SimpleIntegerProperty(fileId);
+        this.fileId=new SimpleStringProperty(fileId);
     }
     
     public String getFilaName() {
@@ -34,7 +34,7 @@ public class FileData {
         return path.get();
     }
     
-    public int getFileId() {
+    public String getFileId() {
         return fileId.get();
     }
     

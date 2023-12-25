@@ -20,6 +20,7 @@ public class FileManagment {
     private String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "abcdefghijklmnopqrstuvxyz";
     private DB db=new DB();
     private MainController mc=new MainController();
+    public String fileDirectory="Folder"+File.separator;
     
     private String generateRandomString(int n){
         StringBuilder sb = new StringBuilder(n); 
@@ -36,23 +37,31 @@ public class FileManagment {
         return sb.toString(); 
     } 
     
+    private void writeFile(String filePath, String fileContent){
+        try {
+            FileWriter fw;
+            fw = new FileWriter(filePath);
+            fw.write(fileContent);
+            fw.close();
+        } catch (IOException ex) {
+            Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     public boolean createNewFile(String user,String filenName, String content){
         Boolean flag =false;
         try {
             String actualFileName=this.generateRandomString(10);
-            String filePath="Folder"+File.separator+actualFileName+".txt";
+            String filePath=this.fileDirectory+actualFileName+".txt";
             
             File fl=new File(filePath);
             fl.getParentFile().mkdirs();
             
             if(fl.createNewFile()){
-                FileWriter fw;
-                fw = new FileWriter(filePath);
-                fw.write(content);
-                fw.close();
+               this.writeFile(filePath, content);
             }
             
-            String userId=db.getUserId(user);
+            String userId=db.getUser(user,"name", "id");
             
             db.addFileDataToDB(userId, filenName, actualFileName+".txt", fl.length()+" bytes");
             
@@ -63,6 +72,31 @@ public class FileManagment {
             
         } catch (IOException ex) {
             Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidKeySpecException ex) {
+            Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return flag;
+        
+    }
+    
+    public boolean updatFile(String id, String name, String fileName, String content){
+        Boolean flag =false;
+        String filePath=this.fileDirectory+fileName;
+        try {
+            File fl=new File(filePath);
+//            fl.getParentFile().mkdirs();
+            
+            this.writeFile(filePath, content);
+            
+            db.updateFileData(id, name, fl.length()+"bytes");
+            
+            if(this.mc.dialogue("File updated successfully", "Successful!",Alert.AlertType.INFORMATION).equals("OK")){
+                flag=true;
+            }
+            
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
