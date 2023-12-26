@@ -15,9 +15,9 @@ import java.util.logging.Logger;
 public class ACLManagment {
     private DB db=new DB();
     
-    public void addACL(String userId, String fileId, Boolean read, Boolean write){
+    public void addACL(String userId, String fileId, Boolean write){
         try {
-            this.db.addACLData(userId, fileId, read, write);
+            this.db.addACLData(userId, fileId, write);
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(ACLManagment.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
@@ -25,9 +25,9 @@ public class ACLManagment {
         }
     }
     
-    public void updateACL(String userId, String fileId, Boolean read, Boolean write){
+    public void updateACL(String userId, String fileId, Boolean write){
         try {
-            this.db.updateACLData(fileId, userId, read, write);
+            this.db.updateACLData(fileId, userId, write);
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(ACLManagment.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
@@ -44,4 +44,6 @@ public class ACLManagment {
             Logger.getLogger(ACLManagment.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    
 }

@@ -125,7 +125,7 @@ public class DB {
     }
 
     public void createACLsTable() throws InvalidKeySpecException, ClassNotFoundException {
-        this.executeDb("create table if not exists " + this.aclTableName + "(id integer primary key autoincrement, fileId string, userId String, read boolean, write boolean)", false);
+        this.executeDb("create table if not exists " + this.aclTableName + "(id integer primary key autoincrement, fileId string, userId String, write boolean)", false);
         this.closeConnection();
     }
     /**
@@ -386,16 +386,17 @@ public class DB {
         this.closeConnection();
     }
     
-    public void addACLData(String userId, String fileId, Boolean read, Boolean write) throws InvalidKeySpecException, ClassNotFoundException {
-        this.executeDb("insert into " + this.aclTableName + " (fileId, userId, read, write) values('" + fileId + "','" + userId + "','"+read+"','"+write+"')", false);
+    public void addACLData(String userId, String fileId, Boolean write) throws InvalidKeySpecException, ClassNotFoundException {
+        this.executeDb("insert into " + this.aclTableName + " (fileId, userId, write) values('" + fileId + "','" + userId +"','"+write+"')", false);
         this.closeConnection();
     }
     
-    public void updateACLData(String fileId, String userId, Boolean read, Boolean write) throws InvalidKeySpecException, ClassNotFoundException{
-        this.executeDb("update "+this.aclTableName+" set userID='"+userId+"', read='"+read+"', write='"+write+"' where fileId='"+fileId+"'", false);
+    public void updateACLData(String fileId, String userId, Boolean write) throws InvalidKeySpecException, ClassNotFoundException{
+        this.executeDb("update "+this.aclTableName+" set userID='"+userId+"', write='"+write+"' where fileId='"+fileId+"'", false);
     }
     
     public boolean deleteACL(String fileId) throws InvalidKeySpecException, ClassNotFoundException {
+        System.out.println("delete");
         Boolean flag = false;
         try {
             this.executeDb("delete from " + this.aclTableName + " where fileId='"+fileId+"'", false);
@@ -406,5 +407,22 @@ public class DB {
         return flag;
     }
     
+    public ObservableList<ACL> getUserAcl(String value, String key) throws ClassNotFoundException, InvalidKeySpecException {
+        ObservableList<ACL> result = FXCollections.observableArrayList();
+        try {
+            ResultSet rs=this.executeDb("select * from " + this.aclTableName+ " where "+key+"='"+value+"'", true);
+
+            while (rs.next()) {
+                System.out.println("data "+ rs.getString("write"));
+                result.add(new ACL(rs.getString("userId"),rs.getString("fileId"), rs.getString("write")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally{
+            this.closeConnection();
+        }
+        return result;
+    }
     
 }

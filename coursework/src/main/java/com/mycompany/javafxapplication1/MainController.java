@@ -24,6 +24,8 @@ import javafx.stage.Stage;
  */
 public class MainController {
     private String[] emptyArray={};
+    
+        
     private void openView(int width, int height, String fileName, String title,String[] data){
         Stage secondaryStage = new Stage();
 
@@ -99,6 +101,6 @@ public class MainController {
     }
     
     public void redirectFile(String[] data, String title){
-        this.openView(640,480,"file.fxml",title,data);
+        this.openView(640,680,"file.fxml",title,data);
     }
 }
