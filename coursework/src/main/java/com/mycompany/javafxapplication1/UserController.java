@@ -124,16 +124,21 @@ public class UserController {
     
     @FXML
     private void onSharedFileEdit(){
-        
+        Stage primaryStage = (Stage) userEditFlBtn.getScene().getWindow();
+        String[] data={this.username,this.sharedFileId,"false", "no"};
+        this.mc.redirectFile(data, "Edit file");
+        primaryStage.close();
     }
     
     private void getFileData(){
         ObservableList<FileData> data;
+        ObservableList<ACL> aclData;
+        ObservableList<FileData> sharedFileData;
         
         try {
             String userId= db.getUser(this.username,"name","id");
-            System.out.println(userId);
             data = this.db.getFileFromTable(userId,"userId");
+            aclData=this.db.getUserAcl(userId, "userId");
             
             if(!data.isEmpty()){
                 userFileName.setText(data.get(0).getFilaName()+".txt");
@@ -147,7 +152,26 @@ public class UserController {
                 userDelFlBtn.setVisible(false);
                 userEditFlBtn.setVisible(false);
                 fileCreate.setVisible(true);
+                this.userFileId="";
             }
+            
+            if(!aclData.isEmpty()){
+                sharedFileData=this.db.getFileFromTable(aclData.get(0).getFileId(), "id");
+                sharedFlEditBtn.setVisible(true);
+                this.sharedFileId=aclData.get(0).getFileId();
+                this.sharedFlEditBtn.setText(aclData.get(0).getWrite().equals("true")?"Edit":"View");
+
+                
+                if(!sharedFileData.isEmpty()){
+                    sharedFileName.setText(sharedFileData.get(0).getFilaName()+".txt");
+                }
+            }
+            else{
+                    sharedFileName.setText("No shared File");
+                    sharedFlEditBtn.setVisible(false);
+                    this.sharedFileId="";
+                }
+
             
                 
         } catch (InvalidKeySpecException ex) {
@@ -161,8 +185,6 @@ public class UserController {
         this.username=credentials[0];
         userLabel.setText(this.username);
         
-        
-//        userEditFlBtn.setVisible(false);
         this.getFileData();
     }
     

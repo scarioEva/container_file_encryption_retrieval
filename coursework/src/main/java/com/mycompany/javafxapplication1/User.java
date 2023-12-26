@@ -18,6 +18,10 @@ public class User {
         this.user = new SimpleStringProperty(user);
         this.pass = new SimpleStringProperty(pass);
     }
+    
+    User(String user) {
+        this.user = new SimpleStringProperty(user);
+    }
 
     public String getUser() {
         return user.get();
