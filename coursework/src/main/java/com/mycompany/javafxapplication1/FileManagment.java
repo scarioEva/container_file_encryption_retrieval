@@ -20,7 +20,10 @@ public class FileManagment {
     private String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "abcdefghijklmnopqrstuvxyz";
     private DB db=new DB();
     private MainController mc=new MainController();
-    public String fileDirectory="Folder"+File.separator;
+    public String fileDirectory="";
+    FileContainers fc=new FileContainers();
+//    public String fileDirectory="Folder"+File.separator;
+
     
     private String generateRandomString(int n){
         StringBuilder sb = new StringBuilder(n); 
@@ -48,6 +51,8 @@ public class FileManagment {
         }
     }
     
+  
+    
     public boolean createNewFile(String user,String filenName, String content){
         Boolean flag =false;
         try {
@@ -55,11 +60,19 @@ public class FileManagment {
             String filePath=this.fileDirectory+actualFileName+".txt";
             
             File fl=new File(filePath);
-            fl.getParentFile().mkdirs();
+//            fl.getParentFile().mkdirs();
             
             if(fl.createNewFile()){
                this.writeFile(filePath, content);
             }
+            
+            FileSplit fs=new FileSplit();
+            
+            fs.fileSplit(fl, actualFileName);
+//            fc.fileUpload(fl, fl, fl, fl);
+            
+            
+            
             
             String userId=db.getUser(user,"name", "id");
             

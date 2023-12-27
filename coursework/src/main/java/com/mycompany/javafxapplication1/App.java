@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  * JavaFX App
  */
 public class App extends Application {
-// test git config name and email update
+    
     @Override
     public void start(Stage stage) throws IOException, InvalidKeySpecException {
         Stage secondaryStage = new Stage();
