@@ -71,6 +71,8 @@ public class FileSplit {
                 ZipFile zipfile=new ZipFile(zipFileName, "password".toCharArray());
                 File partFile=new File(newFileName);
                 zipfile.addFile(partFile,zipParameters);
+                
+                System.out.println("sip name:"+zipFileName);
                 fileArray.add(zipFileName);
                 partFile.delete();
             }

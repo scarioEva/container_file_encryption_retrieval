@@ -59,21 +59,22 @@ public class FileContainers {
         return (ChannelSftp) sftp;
     }
 
+    public LinkedList fileCOntainers() {
+        LinkedList<String> fileContainers = new LinkedList();
+        fileContainers.add(this.FILE_CONATINER1_REMOTE_HOST);
+        fileContainers.add(this.FILE_CONATINER2_REMOTE_HOST);
+        fileContainers.add(this.FILE_CONATINER3_REMOTE_HOST);
+        fileContainers.add(this.FILE_CONATINER4_REMOTE_HOST);
+
+        return fileContainers;
+    }
+
     public void fileUpload(LinkedList<String> array) {
-        if (!array.get(0).equals("")) {
-            onFileUpload(this.FILE_CONATINER1_REMOTE_HOST, array.get(0));
-        }
-
-        if (!array.get(1).equals("")) {
-            onFileUpload(this.FILE_CONATINER2_REMOTE_HOST, array.get(0));
-        }
-
-        if (!array.get(2).equals("")) {
-            onFileUpload(this.FILE_CONATINER3_REMOTE_HOST, array.get(0));
-        }
-
-        if (!array.get(3).equals("")) {
-            onFileUpload(this.FILE_CONATINER4_REMOTE_HOST, array.get(0));
+        
+        LinkedList<String> fileContainers=this.fileCOntainers();
+        
+        for(int i=0; i<array.size();i++){
+            onFileUpload(fileContainers.get(i), array.get(i));
         }
     }
 
@@ -84,16 +85,17 @@ public class FileContainers {
             ChannelSftp channelSftp = setupJsch(remoteHost);
 //            channelSftp.connect();
 
-            channelSftp.put(fl.getName(), this.REMOTE_FILE);
+            channelSftp.put(file, this.REMOTE_FILE);
             channelSftp.exit();
 
         } catch (JSchException | SftpException e) {
             Logger.getLogger(FileContainers.class.getName()).log(Level.SEVERE, null, e);
         } finally {
 
+            fl.delete();
+
             if (jschSession != null) {
                 jschSession.disconnect();
-                fl.delete();
             }
         }
     }
