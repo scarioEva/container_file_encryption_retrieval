@@ -22,10 +22,10 @@ import java.util.logging.Logger;
  */
 public class FileContainers {
 
-    private static final String FILE_CONATINER1_REMOTE_HOST = "172.20.0.2";
-    private static final String FILE_CONATINER2_REMOTE_HOST = "172.20.0.4";
-    private static final String FILE_CONATINER3_REMOTE_HOST = "172.20.0.5";
-    private static final String FILE_CONATINER4_REMOTE_HOST = "172.20.0.3";
+    private static final String FILE_CONATINER1_REMOTE_HOST = "172.21.0.3";
+    private static final String FILE_CONATINER2_REMOTE_HOST = "172.21.0.4";
+    private static final String FILE_CONATINER3_REMOTE_HOST = "172.21.0.5";
+    private static final String FILE_CONATINER4_REMOTE_HOST = "172.21.0.6";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "soft40051_pass";
     private static final int REMOTE_PORT = 22;
