@@ -20,8 +20,8 @@ public class FileManagment {
     private String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "abcdefghijklmnopqrstuvxyz";
     private DB db=new DB();
     private MainController mc=new MainController();
-    public String fileDirectory="";
-    FileContainers fc=new FileContainers();
+    FileServers fc=new FileServers();
+    private CommonClass commonClass=new CommonClass();
 //    public String fileDirectory="Folder"+File.separator;
 
     
@@ -57,7 +57,7 @@ public class FileManagment {
         Boolean flag =false;
         try {
             String actualFileName=this.generateRandomString(10);
-            String filePath=this.fileDirectory+actualFileName+".txt";
+            String filePath=commonClass.localDirectory+actualFileName+".txt";
             
             File fl=new File(filePath);
 //            fl.getParentFile().mkdirs();
@@ -66,7 +66,7 @@ public class FileManagment {
                this.writeFile(filePath, content);
             }
             
-            FileSplit fs=new FileSplit();
+            FileChunk fs=new FileChunk();
             
             fs.fileSplit(fl, actualFileName);
 //            fc.fileUpload(fl, fl, fl, fl);
@@ -76,7 +76,7 @@ public class FileManagment {
             
             String userId=db.getUser(user,"name", "id");
             
-            db.addFileDataToDB(userId, filenName, actualFileName+".txt", fl.length()+" bytes");
+            db.addFileDataToDB(userId, filenName, actualFileName, fl.length()+" bytes");
             
             if(this.mc.dialogue("File created successfully", "Successful!",Alert.AlertType.INFORMATION).equals("OK")){
                 flag=true;
@@ -97,7 +97,7 @@ public class FileManagment {
     
     public boolean updatFile(String id, String name, String fileName, String content){
         Boolean flag =false;
-        String filePath=this.fileDirectory+fileName;
+        String filePath=commonClass.localDirectory+ fileName+".txt";
         try {
             File fl=new File(filePath);
 //            fl.getParentFile().mkdirs();
@@ -106,6 +106,12 @@ public class FileManagment {
             
             db.updateFileData(id, name, fl.length()+"bytes");
             
+            FileChunk fs=new FileChunk();
+            
+            System.out.println("path:"+filePath+"\nfilename:"+ fileName);
+            
+            fs.fileSplit(fl, fileName);
+            
             if(this.mc.dialogue("File updated successfully", "Successful!",Alert.AlertType.INFORMATION).equals("OK")){
                 flag=true;
             }
@@ -113,6 +119,8 @@ public class FileManagment {
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
+            Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
             Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
         }
         

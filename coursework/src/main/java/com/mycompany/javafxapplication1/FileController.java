@@ -44,6 +44,9 @@ public class FileController {
     private String fileId;
     private String filePath;
     private ACLManagment acl = new ACLManagment();
+    private FileServers fileservers = new FileServers();
+    private FileChunk fileChunk = new FileChunk();
+    private CommonClass commonClass = new CommonClass();
 
     @FXML
     private TextArea fileTextArea;
@@ -140,7 +143,6 @@ public class FileController {
 
         String fileName = fileNameId.getText();
         String fileContent = fileTextArea.getText();
-//        System.out.println(userSelect.getValue());
         if (createMode) {
             if (!fileName.equals("")) {
                 if (shareFileCheckBox.isSelected()) {
@@ -157,18 +159,15 @@ public class FileController {
                 this.mc.dialogue("Error", "Please enter name of the file", Alert.AlertType.ERROR);
             }
         } else {
-            
+
             if (this.userFile) {
-                System.out.println("calling" + this.userFile);
                 if (!shareFileCheckBox.isSelected()) {
-                    System.out.println("hello");
                     this.acl.deleteACL(this.fileId);
                     this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent);
                 } else {
 
                     if (userSelect.getValue() != null) {
                         if (checkUserAclExists()) {
-                            System.out.println("exists");
                             String new_userId = this.db.getUser(userSelect.getValue().toString(), "name", "id");
                             this.acl.updateACL(new_userId, this.fileId, writeCheckbox.isSelected());
                         } else {
@@ -180,8 +179,7 @@ public class FileController {
                         this.mc.dialogue("Error", "Please select user to share file", Alert.AlertType.ERROR);
                     }
                 }
-            }
-            else{
+            } else {
                 this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent);
             }
 
@@ -203,22 +201,32 @@ public class FileController {
     }
 
     private void getFileContent(String fileName) {
-        try {
-            FileManagment fm = new FileManagment();
-            FileReader fileReader = new FileReader(fm.fileDirectory + fileName);
-            var bufferReader = new BufferedReader(fileReader);
+        String remoteFile;
+            if (fileChunk.merge(fileName, fileservers.downloadEncryptedFile(fileName))) {
+                remoteFile = commonClass.localDirectory + fileName+".txt";
 
-            String fileData;
+                try {
+                    //update to read conainer
 
-            while ((fileData = bufferReader.readLine()) != null) {
-                fileTextArea.setText(fileData);
-            }
-            fileReader.close();
+                    FileReader fileReader = new FileReader(remoteFile);
+                    var bufferReader = new BufferedReader(fileReader);
 
-        } catch (FileNotFoundException fe) {
+                    String fileData;
 
-        } catch (IOException ie) {
+                    while ((fileData = bufferReader.readLine()) != null) {
+                        fileTextArea.setText(fileData);
+                    }
+                    fileReader.close();
+                    
+                    //delete tem file after sent to TextField
+                    File fl=new File(remoteFile);
+                    fl.delete();
 
+                } catch (FileNotFoundException fe) {
+
+                } catch (IOException ie) {
+
+                }
         }
 
     }
@@ -235,6 +243,7 @@ public class FileController {
                 if (!data.isEmpty()) {
                     fileNameId.setText(data.get(0).getFilaName());
                     this.filePath = data.get(0).getPath();
+
                     this.getFileContent(this.filePath);
 
                     String ownerName = this.db.getUser(data.get(0).getUserId(), "id", "name");
@@ -258,15 +267,11 @@ public class FileController {
             ObservableList<User> data;
             data = this.db.getUserList();
             if (!data.isEmpty()) {
-                System.out.println(data.get(0).getUser());
-                System.out.println(data.get(1).getUser());
-                System.out.println(data.size());
 
                 LinkedList<String> userData = new LinkedList();
 
                 for (int i = 0; i < data.size(); i++) {
                     String user = data.get(i).getUser();
-                    System.out.println("usermname :" + this.username);
                     if (!user.equals(this.username) && !user.equals("admin")) {
                         userData.add(user);
                     }
@@ -291,12 +296,10 @@ public class FileController {
             if (!data.isEmpty()) {
                 if (userFile) {
                     String shared_username = this.db.getUser(data.get(0).getUserId(), "id", "name");
-                    System.out.println(shared_username);
                     if (!shared_username.equals("")) {
                         shareContainer.setVisible(true);
                         shareFileCheckBox.setSelected(true);
                         writeCheckbox.setSelected(data.get(0).getWrite().equals("true"));
-                        System.out.println(data.get(0).getWrite());
                         userSelect.setValue(shared_username);
                     } else {
                         shareContainer.setVisible(false);
