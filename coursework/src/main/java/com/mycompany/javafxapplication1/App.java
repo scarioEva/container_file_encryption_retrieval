@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  * JavaFX App
  */
 public class App extends Application {
-    
+
     @Override
     public void start(Stage stage) throws IOException, InvalidKeySpecException {
         Stage secondaryStage = new Stage();
@@ -24,6 +24,9 @@ public class App extends Application {
 //        myObj.log("\n---------- Drop table ----------");
 //        try {
 //            myObj.delTable(myObj.getTableName());
+//            myObj.delFileTable();
+//            myObj.delAclTable();
+//
 //        } catch (ClassNotFoundException ex) {
 //            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
 //        }
@@ -32,13 +35,14 @@ public class App extends Application {
             myObj.createTable(myObj.getTableName());
             myObj.createFilesTable();
             myObj.createACLsTable();
+            myObj.createEncryptionTable();
 
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
-          MainController mc= new MainController();
-          mc.redirectLogin();
+            MainController mc = new MainController();
+            mc.redirectLogin();
 
         } catch (Exception e) {
             e.printStackTrace();

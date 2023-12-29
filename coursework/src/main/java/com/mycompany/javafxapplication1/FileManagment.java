@@ -17,28 +17,16 @@ import javafx.scene.control.Alert;
  * @author ntu-user
  */
 public class FileManagment {
-    private String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "abcdefghijklmnopqrstuvxyz";
+    
     private DB db=new DB();
     private MainController mc=new MainController();
     FileServers fc=new FileServers();
     private CommonClass commonClass=new CommonClass();
+    private String fileLength;
 //    public String fileDirectory="Folder"+File.separator;
 
     
-    private String generateRandomString(int n){
-        StringBuilder sb = new StringBuilder(n); 
-        for (int i = 0; i < n; i++) { 
- 
-            // generate a random number between 
-            // 0 to AlphaNumericString variable length 
-            int index   = (int)(this.AlphaNumericString.length() * Math.random()); 
- 
-            // add Character one by one in end of sb 
-            sb.append(this.AlphaNumericString.charAt(index)); 
-        } 
- 
-        return sb.toString(); 
-    } 
+
     
     private void writeFile(String filePath, String fileContent){
         try {
@@ -54,9 +42,11 @@ public class FileManagment {
   
     
     public boolean createNewFile(String user,String filenName, String content){
+        String generateFileId=commonClass.generateRandomString(10);
+        
         Boolean flag =false;
         try {
-            String actualFileName=this.generateRandomString(10);
+            String actualFileName=commonClass.generateRandomString(10);
             String filePath=commonClass.localDirectory+actualFileName+".txt";
             
             File fl=new File(filePath);
@@ -65,10 +55,11 @@ public class FileManagment {
             if(fl.createNewFile()){
                this.writeFile(filePath, content);
             }
+            this.fileLength=fl.length()+"bytes";
             
             FileChunk fs=new FileChunk();
             
-            fs.fileSplit(fl, actualFileName);
+            fs.fileSplit( fl, actualFileName,generateFileId, true);
 //            fc.fileUpload(fl, fl, fl, fl);
             
             
@@ -76,7 +67,7 @@ public class FileManagment {
             
             String userId=db.getUser(user,"name", "id");
             
-            db.addFileDataToDB(userId, filenName, actualFileName, fl.length()+" bytes");
+            db.addFileDataToDB(generateFileId, userId, filenName, actualFileName, this.fileLength);
             
             if(this.mc.dialogue("File created successfully", "Successful!",Alert.AlertType.INFORMATION).equals("OK")){
                 flag=true;
@@ -110,7 +101,7 @@ public class FileManagment {
             
             System.out.println("path:"+filePath+"\nfilename:"+ fileName);
             
-            fs.fileSplit(fl, fileName);
+            fs.fileSplit(fl, fileName, id, false);
             
             if(this.mc.dialogue("File updated successfully", "Successful!",Alert.AlertType.INFORMATION).equals("OK")){
                 flag=true;

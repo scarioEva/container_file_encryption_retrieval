@@ -93,7 +93,7 @@ public class MainController {
     }
     
     public void redirectUser(String[] credentials){
-        this.openView(640,480,"user.fxml","User",credentials);
+        this.openView(640,780,"user.fxml","User",credentials);
     }
     
     public void redirectEditProfile(String[] credentials){

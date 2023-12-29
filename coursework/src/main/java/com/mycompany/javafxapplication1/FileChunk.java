@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,8 +32,13 @@ public class FileChunk {
 
     private static byte PART_SIZE = 4;
     private CommonClass commonClass = new CommonClass();
+    private String fileId;
+    private DB db = new DB();
+    private Boolean isCreate;
 
     private void split(File file, String name, byte part_size) {
+
+        String encryptionKey = commonClass.generateRandomString(10);
 
         ZipParameters zipParameters = new ZipParameters();
         zipParameters.setEncryptFiles(true);
@@ -59,7 +65,7 @@ public class FileChunk {
                 assert (read == byteChunkPart.length);
                 nChunks++;
 
-                newFileName =  file + ".part" + Integer.toString(nChunks - 1);
+                newFileName = file + ".part" + Integer.toString(nChunks - 1);
                 filePart = new FileOutputStream(new File(newFileName));
                 filePart.write(byteChunkPart);
                 filePart.flush();
@@ -68,14 +74,11 @@ public class FileChunk {
                 filePart = null;
 
                 String zipFileName = commonClass.localDirectory + name + "part" + Integer.toString(nChunks - 1) + ".zip";
-//                ZipFile zipfile=new ZipFile(zipFileName, "password".toCharArray());
-                ZipFile zipfile = new ZipFile(zipFileName);
+                ZipFile zipfile = new ZipFile(zipFileName, encryptionKey.toCharArray());
 
                 File partFile = new File(newFileName);
-//                zipfile.addFile(partFile,zipParameters);  
-                zipfile.addFile(partFile);
+                zipfile.addFile(partFile, zipParameters);
 
-                System.out.println("sip name:" + zipFileName);
                 fileArray.add(zipFileName);
                 partFile.delete();
             }
@@ -83,8 +86,20 @@ public class FileChunk {
             file.delete();
             FileServers fc = new FileServers();
             fc.fileUpload(fileArray, name);
+
+            //adding encryption key to database
+            if (isCreate) {
+                db.addKeysToDb(encryptionKey, this.fileId);
+            } else {
+                db.updateKeyData(this.fileId, encryptionKey);
+            }
+
         } catch (IOException exception) {
             exception.printStackTrace();
+        } catch (InvalidKeySpecException ex) {
+            Logger.getLogger(FileChunk.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(FileChunk.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -99,16 +114,23 @@ public class FileChunk {
         return (int) x;
     }
 
-    public void fileSplit(File fl, String name) throws IOException {
+    public void fileSplit(File fl, String name, String newFileId, Boolean isCreate) throws IOException {
+        this.fileId = newFileId;
+        this.isCreate = isCreate;
         this.split(fl, name, (byte) this.getSizeInBytes(fl.length(), this.PART_SIZE));
     }
 
+    private String getDecryptionKey() {
+        return db.getKeyFromDb(this.fileId);
+    }
+
     private Boolean decryptFile(LinkedList<String> fileArray) {
+        String key = this.getDecryptionKey();
         for (int i = 0; i < fileArray.size(); i++) {
             String fileName = commonClass.localDirectory + fileArray.get(i);
 
             try {
-                ZipFile zipFile = new ZipFile(fileName);
+                ZipFile zipFile = new ZipFile(fileName, key.toCharArray());
 //              ZipFile zipFIle = new ZipFile(commonClass.localDirectory + fileArray.get(i) + "part" + i + ".zip", "password".toCharArray());
                 zipFile.extractAll(commonClass.localDirectory);
                 System.out.println("unzipping");
@@ -123,7 +145,8 @@ public class FileChunk {
         return true;
     }
 
-    public Boolean merge(String outputFile, LinkedList<String> fileArray) {
+    public Boolean merge(String outputFile, LinkedList<String> fileArray, String fileId) {
+        this.fileId = fileId;
         System.out.println("merge calling");
         Boolean flag = false;
         LinkedList<String> fileList = new LinkedList();

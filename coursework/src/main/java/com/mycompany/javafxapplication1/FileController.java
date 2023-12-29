@@ -202,7 +202,7 @@ public class FileController {
 
     private void getFileContent(String fileName) {
         String remoteFile;
-            if (fileChunk.merge(fileName, fileservers.downloadEncryptedFile(fileName))) {
+            if (fileChunk.merge(fileName, fileservers.downloadEncryptedFile(fileName), this.fileId)) {
                 remoteFile = commonClass.localDirectory + fileName+".txt";
 
                 try {
@@ -239,7 +239,7 @@ public class FileController {
         ObservableList<FileData> data;
         try {
             if (!this.createMode) {
-                data = this.db.getFileFromTable(this.fileId, "id");
+                data = this.db.getFileFromTable(this.fileId, "fileId");
                 if (!data.isEmpty()) {
                     fileNameId.setText(data.get(0).getFilaName());
                     this.filePath = data.get(0).getPath();
