@@ -55,28 +55,6 @@ public class RegisterController {
     private Text fileText;
     
     @FXML
-    private Button selectBtn;
-    
-    @FXML
-    private void selectBtnHandler(ActionEvent event) throws IOException {
-        Stage primaryStage = (Stage) selectBtn.getScene().getWindow();
-        primaryStage.setTitle("Select a File");
-
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Resource File");
-        File selectedFile = fileChooser.showOpenDialog(primaryStage);
-        
-        if(selectedFile!=null){
-//            fileText.setText((String)selectedFile.getCanonicalPath());
-//            fileText.setText((String)selectedFile);
-
-//            selectedFile.ge
-        }
-        
-    }
-
-
-    @FXML
     private void registerBtnHandler(ActionEvent event) {
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
         try {

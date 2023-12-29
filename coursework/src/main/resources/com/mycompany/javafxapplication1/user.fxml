@@ -38,6 +38,7 @@
             <Label fx:id="userFileName" prefHeight="16.0" prefWidth="258.0" GridPane.rowIndex="3" />
             <Button fx:id="userEditFlBtn" mnemonicParsing="false" onAction="#onUserFileEdit" text="Edit" GridPane.columnIndex="3" GridPane.rowIndex="3" />
             <Button fx:id="userDelFlBtn" mnemonicParsing="false" onAction="#onUserFlDel" text="Delete" textFill="RED" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <Button fx:id="selectBtn" mnemonicParsing="false" onAction="#selectBtnHandler" text="Upload File" GridPane.columnIndex="1" />
          </children>
       </GridPane>
       <Button fx:id="sharedFlEditBtn" layoutX="533.0" layoutY="521.0" mnemonicParsing="false" onAction="#onSharedFileEdit" text="Edit" />

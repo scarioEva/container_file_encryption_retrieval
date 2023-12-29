@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -36,6 +37,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /**
@@ -51,6 +53,7 @@ public class UserController {
     private DB db = new DB();
     private String userFileId;
     private String sharedFileId;
+    private FileManagment fileManage = new FileManagment();
 
     @FXML
     private Label userLabel;
@@ -83,6 +86,48 @@ public class UserController {
 
     @FXML
     private ChoiceBox sharedFileSelect;
+
+    @FXML
+    private Button selectBtn;
+
+    @FXML
+    private void selectBtnHandler(ActionEvent event) throws IOException {
+        Stage primaryStage = (Stage) selectBtn.getScene().getWindow();
+        primaryStage.setTitle("Select a File");
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Resource File");
+        File selectedFile = fileChooser.showOpenDialog(primaryStage);
+
+        if (selectedFile != null) {
+//            System.out.println();
+            String selectedFileName = selectedFile.getName();
+
+            FileReader fileReader = new FileReader(selectedFile);
+            var bufferReader = new BufferedReader(fileReader);
+
+            String content = "";
+
+            String fileData;
+
+            while ((fileData = bufferReader.readLine()) != null) {
+                content = fileData;
+            }
+            fileReader.close();
+
+            System.out.println("content:" + content);
+
+            if (fileManage.createNewFile(this.username, selectedFileName.substring(0, selectedFileName.length() - 4), content)) {
+
+                if (this.mc.dialogue("Success", "File uploaded successfully", Alert.AlertType.CONFIRMATION).equals("OK")) {
+                    String[] data = {this.username};
+                    mc.redirectUser(data);
+                    primaryStage.close();
+                }
+            }
+        }
+
+    }
 
     @FXML
     private void handleLogout() {
