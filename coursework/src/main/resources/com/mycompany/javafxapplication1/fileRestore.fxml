@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="AnchorPane" prefHeight="653.0" prefWidth="954.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.javafxapplication1.FileRestoreController">
+   <children>
+      <Label layoutX="46.0" layoutY="62.0" text="Select file name:" />
+      <Label layoutX="490.0" layoutY="62.0" text="Choose versions:" />
+      <Label fx:id="fileNameText" layoutX="46.0" layoutY="332.0" prefHeight="16.0" prefWidth="509.0" />
+      <TextArea fx:id="fileContent" disable="true" layoutX="46.0" layoutY="368.0" prefHeight="212.0" prefWidth="855.0" />
+      <Button fx:id="saveBtn" layoutX="490.0" layoutY="603.0" mnemonicParsing="false" onAction="#onSave" text="Save" />
+      <Button fx:id="cancelBtn" layoutX="397.0" layoutY="603.0" mnemonicParsing="false" onAction="#onCancel" text="Cancel" />
+      <TableView fx:id="fileTable" layoutX="46.0" layoutY="82.0" prefHeight="206.0" prefWidth="414.0" />
+      <TableView fx:id="versionTable" layoutX="490.0" layoutY="82.0" prefHeight="206.0" prefWidth="414.0" />
+   </children>
+</AnchorPane>

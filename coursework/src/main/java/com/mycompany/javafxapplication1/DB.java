@@ -50,6 +50,8 @@ public class DB {
     private int iterations = 10000;
     private int keylength = 256;
     private String saltValue;
+    private String fileVersionsTable = "FileVersions";
+    private CommonClass commonClass = new CommonClass();
 
     /**
      * @brief constructor - generates the salt if it doesn't exists or load it
@@ -123,17 +125,22 @@ public class DB {
     }
 
     public void createFilesTable() throws InvalidKeySpecException, ClassNotFoundException {
-        this.executeDb("create table if not exists " + this.filesTableName + "(fileId string primary key, name string, userId String, size string, path string)", false);
+        this.executeDb("create table if not exists " + this.filesTableName + "(fileId string primary key, name string, userId string, size string, path string, version integer, created_at string, last_modified string, active boolean)", false);
         this.closeConnection();
     }
 
     public void createACLsTable() throws InvalidKeySpecException, ClassNotFoundException {
-        this.executeDb("create table if not exists " + this.aclTableName + "(id integer primary key autoincrement, fileId string, userId String, write boolean)", false);
+        this.executeDb("create table if not exists " + this.aclTableName + "(id integer primary key autoincrement, fileId string, userId string, write boolean)", false);
         this.closeConnection();
     }
 
     public void createEncryptionTable() throws InvalidKeySpecException, ClassNotFoundException {
-        this.executeDb("create table if not exists " + this.encryptionTableName + "(encryptionId integer primary key autoincrement, key string, fileId String)", false);
+        this.executeDb("create table if not exists " + this.encryptionTableName + "(encryptionId integer primary key autoincrement, key string, fileId string)", false);
+        this.closeConnection();
+    }
+
+    public void createFileVersionsTable() throws InvalidKeySpecException, ClassNotFoundException {
+        this.executeDb("create table if not exists " + this.fileVersionsTable + "(versionId integer primary key autoincrement,  fileId string, version integer, updatedFileName string, lastModified string)", false);
         this.closeConnection();
     }
 
@@ -370,8 +377,8 @@ public class DB {
         return flag;
     }
 
-    public void addFileDataToDB(String fileId, String userId, String fileName, String path, String size) throws InvalidKeySpecException, ClassNotFoundException {
-        this.executeDb("insert into " + this.filesTableName + " (fileId, name, userId, size, path) values('" + fileId + "', '" + fileName + "','" + userId + "','" + size + "','" + path + "')", false);
+    public void addFileDataToDB(String fileId, String userId, String fileName, String path, String size, int version, String created_date) throws InvalidKeySpecException, ClassNotFoundException {
+        this.executeDb("insert into " + this.filesTableName + " (fileId, name, userId, size, path, version, created_at, last_modified, active) values('" + fileId + "', '" + fileName + "','" + userId + "','" + size + "','" + path + "','" + version + "','" + commonClass.displayDate(created_date) + "','" + commonClass.displayDate(created_date) + "', true)", false);
         this.closeConnection();
     }
 
@@ -382,7 +389,7 @@ public class DB {
 
             while (rs.next()) {
                 // read the result set
-                result.add(new FileData(rs.getString("name"), rs.getString("path"), rs.getString("fileId"), rs.getString("userId")));
+                result.add(new FileData(rs.getString("name"), rs.getString("path"), rs.getString("fileId"), rs.getString("userId"), rs.getInt("version"), rs.getString("created_at"), rs.getString("last_modified")));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
@@ -392,8 +399,8 @@ public class DB {
         return result;
     }
 
-    public void updateFileData(String fileId, String fileName, String size) throws InvalidKeySpecException, ClassNotFoundException {
-        this.executeDb("update " + this.filesTableName + " set name='" + fileName + "', size='" + size + "' where fileId='" + fileId + "'", false);
+    public void updateFileData(String fileId, String fileName, String size, int version, String update_date, Boolean active) throws InvalidKeySpecException, ClassNotFoundException {
+        this.executeDb("update " + this.filesTableName + " set name='" + fileName + "', size='" + size + "', version='" + version + "', last_modified='" + update_date +"', active="+active+ " where fileId='" + fileId + "'", false);
         this.closeConnection();
     }
 
@@ -439,10 +446,10 @@ public class DB {
         ObservableList<AclList> result = FXCollections.observableArrayList();
         try {
 
-            ResultSet rs = this.executeDb("select a.name, b.write from " + this.filesTableName + " a, " + this.aclTableName + " b where a.fileId=b.fileId and b.userId='" + userId + "'", true);
+            ResultSet rs = this.executeDb("select a.name, b.write, a.fileId from " + this.filesTableName + " a, " + this.aclTableName + " b where a.fileId=b.fileId and b.userId='" + userId + "'", true);
 
             while (rs.next()) {
-                result.add(new AclList(rs.getString("name"), rs.getString("write")));
+                result.add(new AclList(rs.getString("name"), rs.getString("write"), rs.getString("fileId")));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
@@ -489,9 +496,77 @@ public class DB {
         }
         return flag;
     }
-    
-    public void updateKeyData(String fileId, String key) throws InvalidKeySpecException, ClassNotFoundException {
-        this.executeDb("update " + this.encryptionTableName + " set key='" + key +"' where fileId='" + fileId + "'", false);
+
+    public void addFileVersionsToDB(String fileId, int version, String fileName, String dateModified) throws InvalidKeySpecException, ClassNotFoundException {
+        this.executeDb("insert into " + this.fileVersionsTable + " (fileId, version, updatedFileName, lastModified) values('" + fileId + "','" + version + "','" + fileName + "','" + dateModified + "')", false);
+        this.closeConnection();
+    }
+
+    public boolean deleteFileVersions(String fileId, int version) throws InvalidKeySpecException, ClassNotFoundException {
+        Boolean flag = false;
+        try {
+            this.executeDb("delete from " + this.fileVersionsTable + " where fileId='" + fileId + "' and version >" + version, false);
+        } finally {
+            flag = true;
+            this.closeConnection();
+        }
+        return flag;
+    }
+
+    public ObservableList<FileVersions> getFileVersionList(String fileId) throws ClassNotFoundException, InvalidKeySpecException {
+        ObservableList<FileVersions> result = FXCollections.observableArrayList();
+        try {
+
+            ResultSet rs = this.executeDb("select * from " + this.fileVersionsTable + " where fileId='" + fileId + "'", true);
+
+            while (rs.next()) {
+                result.add(new FileVersions(rs.getString("versionId"), rs.getString("fileId"), rs.getString("updatedFileName"),rs.getInt("version"), rs.getString("lastModified")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            this.closeConnection();
+        }
+        return result;
+    }
+
+    public ObservableList<FileRestore> getUserFiles(String userId) throws ClassNotFoundException, InvalidKeySpecException {
+        ObservableList<FileRestore> result = FXCollections.observableArrayList();
+        try {
+
+            ResultSet rs = this.executeDb("select a.fileId, a.version, a.updatedFileName, b.userId, b.path, b.created_at from " + this.fileVersionsTable + " a, " + this.filesTableName + " b where a.fileId=b.fileId and b.userId='" + userId + "' and a.version='1'", true);
+
+            while (rs.next()) {
+                result.add(new FileRestore(rs.getString("fileId"), rs.getString("updatedFileName"),rs.getString("created_at"), rs.getString("path")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            this.closeConnection();
+        }
+        return result;
+    }
+
+    public String getSingleFileData(String key, String value, String output) {
+        String result = "";
+        LinkedList<String> resultArray = new LinkedList();
+        try {
+            ResultSet rs = this.executeDb("select " + output + " from " + this.filesTableName + " where " + key + "='" + value + "'", true);
+
+            while (rs.next()) {
+                resultArray.add(rs.getString(output));
+            }
+
+            result = resultArray.size() == 1 ? resultArray.get(0) : "";
+        } catch (InvalidKeySpecException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return result;
     }
 
 }

@@ -32,6 +32,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -39,6 +40,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 /**
  * FXML Controller class
@@ -68,27 +70,16 @@ public class UserController {
     private Button fileCreate;
 
     @FXML
-    private Button userEditFlBtn;
-
-    @FXML
-    private Button userDelFlBtn;
-
-    @FXML
-    private Button sharedFlEditBtn;
-
-    @FXML
-    private Label userFileName;
-
-//    @FXML
-//    private Label sharedFileName;
-    @FXML
     private TableView sharedFileTableView;
 
     @FXML
-    private ChoiceBox sharedFileSelect;
+    private Button selectBtn;
 
     @FXML
-    private Button selectBtn;
+    private Button fileRestoreBtn;
+    
+    @FXML 
+    private TableView userFileTable;
 
     @FXML
     private void selectBtnHandler(ActionEvent event) throws IOException {
@@ -127,6 +118,14 @@ public class UserController {
             }
         }
 
+    }
+
+    @FXML
+    private void onFileRestore() {
+        Stage primaryStage = (Stage) fileRestoreBtn.getScene().getWindow();
+        String[] data = {this.username};
+        this.mc.redirectFileRestore(data);
+        primaryStage.close();
     }
 
     @FXML
@@ -169,94 +168,93 @@ public class UserController {
 
     }
 
-    @FXML
-    private void onUserFileEdit() {
-        Stage primaryStage = (Stage) userEditFlBtn.getScene().getWindow();
-        String[] data = {this.username, this.userFileId, "false", "yes"};
+    private void onUserFileEdit(String fileId) {
+        Stage primaryStage = (Stage) fileCreate.getScene().getWindow();
+        String[] data = {this.username, fileId, "false", "yes"};
         this.mc.redirectFile(data, "Edit file");
         primaryStage.close();
     }
 
-    @FXML
-    private void onSharedFileEdit() {
-        Stage primaryStage = (Stage) userEditFlBtn.getScene().getWindow();
-        String[] data = {this.username, this.sharedFileId, "false", "no"};
+    private void onSharedFileEdit(String fileId) {
+        Stage primaryStage = (Stage) fileCreate.getScene().getWindow();
+        String[] data = {this.username, fileId, "false", "no"};
         this.mc.redirectFile(data, "Edit file");
         primaryStage.close();
     }
 
-    @FXML
-    private void onFileSelected() {
-//        System.out.println("selected");
-//        sharedFlEditBtn.setVisible(true);
 
-    }
-
-    public void getSharedFileValue(String value) {
-        System.out.println(value);
-        try {
-
-            String fileName = value;
-
-            ObservableList<FileData> fileData;
-
-            fileData = db.getFileFromTable(fileName, "name");
-            sharedFileId = fileData.get(0).getFileId();
-
-            sharedFlEditBtn.setVisible(true);
-
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidKeySpecException ex) {
-            Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+//    public void getSharedFileValue(String value) {
+//        System.out.println(value);
+//        try {
+//
+//            String fileName = value;
+//
+//            ObservableList<FileData> fileData;
+//
+//            fileData = db.getFileFromTable(fileName, "name");
+//            sharedFileId = fileData.get(0).getFileId();
+//
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (InvalidKeySpecException ex) {
+//            Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//    }
 
     private void getFileData() {
         ObservableList<FileData> data;
-        ObservableList<ACL> aclData;
-        ObservableList<FileData> sharedFileData;
 
         try {
             String userId = db.getUser(this.username, "name", "id");
             data = this.db.getFileFromTable(userId, "userId");
-            aclData = this.db.getUserAcl(userId, "userId");
+//            aclData = this.db.getUserAcl(userId, "userId");
 
-            if (!data.isEmpty()) {
-                userFileName.setText(data.get(0).getFilaName() + ".txt");
-                userDelFlBtn.setVisible(true);
-                userEditFlBtn.setVisible(true);
-                fileCreate.setVisible(false);
-                this.userFileId = data.get(0).getFileId();
-            } else {
-                userFileName.setText("No file created");
-                userDelFlBtn.setVisible(false);
-                userEditFlBtn.setVisible(false);
-                fileCreate.setVisible(true);
-                this.userFileId = "";
-            }
+           TableColumn fileName = new TableColumn("File Name");
+            fileName.setCellValueFactory(
+                    new PropertyValueFactory<>("fileName"));
+            
+            TableColumn edit = new TableColumn("Action");
+            
+            Callback<TableColumn<FileData, String>, TableCell<FileData, String>> cellFactory
+                    = new Callback<TableColumn<FileData, String>, TableCell<FileData, String>>() {
+                @Override
+                public TableCell call(final TableColumn<FileData, String> param) {
+                    final TableCell<FileData, String> cell = new TableCell<FileData, String>() {
 
-            if (!aclData.isEmpty()) {
-                sharedFileData = this.db.getFileFromTable(aclData.get(0).getFileId(), "fileId");
-//                sharedFlEditBtn.setVisible(true);
-                this.sharedFileId = aclData.get(0).getFileId();
-//                this.sharedFlEditBtn.setText(aclData.get(0).getWrite().equals("true") ? "Edit" : "View");
+                        @Override
+                        public void updateItem(String item, boolean empty) {
+                            super.updateItem(item, empty);
+                            if (empty) {
+                                setGraphic(null);
+                                setText(null);
+                            } else {
+                                FileData fileData = getTableView().getItems().get(getIndex());
+                                final Button btn = new Button("Edit");
 
-                if (!sharedFileData.isEmpty()) {
-//                    sharedFileName.setText(sharedFileData.get(0).getFilaName()+".txt");
+                                btn.setOnAction(event -> {
+                                    onUserFileEdit(fileData.getFileId());
+                                });
+                                setGraphic(btn);
+                                setText(null);
+                            }
+                        }
+                    };
+                    return cell;
                 }
-            } else {
-//                    sharedFileName.setText("No shared File");
-//                sharedFlEditBtn.setVisible(false);
-                this.sharedFileId = "";
-            }
+            };
 
+
+            edit.setCellFactory(cellFactory);
+            userFileTable.setItems(data);
+            userFileTable.getColumns().addAll(fileName, edit);
+            
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
 
     private void getAclList() {
         try {
@@ -264,6 +262,7 @@ public class UserController {
 
             String userId = this.db.getUser(this.username, "name", "id");
             aclList = this.db.getAclFileList(userId);
+//            this.button=new Button[aclList.size];
 
             TableColumn fileName = new TableColumn("File Name");
             fileName.setCellValueFactory(
@@ -273,18 +272,43 @@ public class UserController {
             write.setCellValueFactory(
                     new PropertyValueFactory<>("write"));
 
-            sharedFileTableView.setItems(aclList);
-            sharedFileTableView.getColumns().addAll(fileName, write);
 
-            if (!aclList.isEmpty()) {
-                LinkedList<String> fileList = new LinkedList();
+            TableColumn action = new TableColumn("Action");
 
-                for (int i = 0; i < aclList.size(); i++) {
-                    fileList.add(aclList.get(i).getFileName());
+            
+            Callback<TableColumn<AclList, String>, TableCell<AclList, String>> cellFactory
+                    = new Callback<TableColumn<AclList, String>, TableCell<AclList, String>>() {
+                @Override
+                public TableCell call(final TableColumn<AclList, String> param) {
+                    final TableCell<AclList, String> cell = new TableCell<AclList, String>() {
+
+                        @Override
+                        public void updateItem(String item, boolean empty) {
+                            super.updateItem(item, empty);
+                            if (empty) {
+                                setGraphic(null);
+                                setText(null);
+                            } else {
+                                AclList aclData = getTableView().getItems().get(getIndex());
+                                final Button btn = new Button(aclData.getWrite().equals("true") ? "Edit" : "View");
+
+                                btn.setOnAction(event -> {
+                                    onSharedFileEdit(aclData.getFileId());
+                                    System.out.println(aclData.getFileId());
+                                });
+                                setGraphic(btn);
+                                setText(null);
+                            }
+                        }
+                    };
+                    return cell;
                 }
+            };
 
-                sharedFileSelect.getItems().addAll(fileList);
-            }
+            action.setCellFactory(cellFactory);
+            sharedFileTableView.setItems(aclList);
+            sharedFileTableView.getColumns().addAll(fileName, write, action);
+
 
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
@@ -298,19 +322,9 @@ public class UserController {
         this.username = credentials[0];
         userLabel.setText(this.username);
 
-        sharedFlEditBtn.setVisible(false);
-
         this.getFileData();
         this.getAclList();
 
-        sharedFileSelect.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                getSharedFileValue(sharedFileSelect.getItems().get((Integer) number2).toString());
-
-//                System.out.println(sharedFileSelect.getItems().get((Integer) number2));
-            }
-        });
     }
 
 }

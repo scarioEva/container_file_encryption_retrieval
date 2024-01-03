@@ -40,11 +40,15 @@ public class CommonClass {
     }
     
     public String displayDate(String date){
-        String new_pattern = "dd MM, yyyy hh:mm";
-        SimpleDateFormat new_simpleDateFormat = new SimpleDateFormat(pattern);
-        String new_date = simpleDateFormat.format(this.getDate(date));
+        String new_pattern = "dd MMM, yyyy hh:mm";
+        SimpleDateFormat new_simpleDateFormat = new SimpleDateFormat(new_pattern);
+        String new_date = new_simpleDateFormat.format(this.getDate(date));
         
         return new_date;
+    }
+    
+    public String parseDate(String date){
+        return simpleDateFormat.format(getDate(date));   
     }
 
     public String generateRandomString(int n) {

@@ -38,7 +38,7 @@ public class FileChunk {
 
     private void split(File file, String name, byte part_size) {
 
-        String encryptionKey = commonClass.generateRandomString(10);
+        String encryptionKey = isCreate ? commonClass.generateRandomString(10) : this.getDecryptionKey();
 
         ZipParameters zipParameters = new ZipParameters();
         zipParameters.setEncryptFiles(true);
@@ -74,10 +74,12 @@ public class FileChunk {
                 filePart = null;
 
                 String zipFileName = commonClass.localDirectory + name + "part" + Integer.toString(nChunks - 1) + ".zip";
-                ZipFile zipfile = new ZipFile(zipFileName, encryptionKey.toCharArray());
+                ZipFile zipfile = new ZipFile(zipFileName);
+//                ZipFile zipfile = new ZipFile(zipFileName, encryptionKey.toCharArray());
 
                 File partFile = new File(newFileName);
-                zipfile.addFile(partFile, zipParameters);
+                zipfile.addFile(partFile);
+//                zipfile.addFile(partFile, zipParameters);
 
                 fileArray.add(zipFileName);
                 partFile.delete();
@@ -90,8 +92,6 @@ public class FileChunk {
             //adding encryption key to database
             if (isCreate) {
                 db.addKeysToDb(encryptionKey, this.fileId);
-            } else {
-                db.updateKeyData(this.fileId, encryptionKey);
             }
 
         } catch (IOException exception) {
@@ -130,8 +130,9 @@ public class FileChunk {
             String fileName = commonClass.localDirectory + fileArray.get(i);
 
             try {
-                ZipFile zipFile = new ZipFile(fileName, key.toCharArray());
-//              ZipFile zipFIle = new ZipFile(commonClass.localDirectory + fileArray.get(i) + "part" + i + ".zip", "password".toCharArray());
+                ZipFile zipFile = new ZipFile(fileName);
+//                ZipFile zipFile = new ZipFile(fileName, key.toCharArray());
+
                 zipFile.extractAll(commonClass.localDirectory);
                 System.out.println("unzipping");
 
@@ -165,7 +166,6 @@ public class FileChunk {
             try {
                 fos = new FileOutputStream(ofile, true);
                 for (String files : fileList) {
-//                    System.out.println("files:" + files);
                     File file = new File(commonClass.localDirectory + files);
 
                     fis = new FileInputStream(file);

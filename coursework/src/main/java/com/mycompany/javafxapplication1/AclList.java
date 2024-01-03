@@ -14,19 +14,24 @@ public class AclList {
 
     private SimpleStringProperty fileName;
     private SimpleStringProperty write;
+    private SimpleStringProperty fileId;
 
-    AclList(String fileName, String write) {
+    AclList(String fileName, String write, String fileId) {
         this.fileName = new SimpleStringProperty(fileName);
         this.write = new SimpleStringProperty(write);
-
+        this.fileId=new SimpleStringProperty(fileId);
     }
 
     public String getFileName() {
         return fileName.get();
     }
-    
+
     public String getWrite() {
         return write.get();
+    }
+    
+    public String getFileId() {
+        return fileId.get();
     }
 
 }

@@ -72,6 +72,8 @@ public class FileServers {
     }
 
     private void deleteRemoteFile(String server, String fileName) {
+        System.out.println("onDelete:"+ fileName);
+
         try {
             ChannelSftp channelSftp = setupJsch(server);
             if (this.checkFileExists(server, fileName)) {
@@ -94,14 +96,21 @@ public class FileServers {
         for (int i = 0; i < fileContainers.size(); i++) {
             if (i < array.size()) {
                 onFileUpload(fileContainers.get(i), array.get(i));
-                System.out.println("call "+i );
-            }
-            else{
-                
-                System.out.println(fileContainers.get(i)+ "==="+fileName);
-                this.deleteRemoteFile(fileContainers.get(i), this.REMOTE_DIRECTORY+fileName+"part"+i+".zip");
+                System.out.println("call " + i);
+            } else {
+
+                System.out.println(fileContainers.get(i) + "===" + fileName);
+                this.deleteRemoteFile(fileContainers.get(i), this.REMOTE_DIRECTORY + fileName + "part" + i + ".zip");
             }
         }
+    }
+
+    public boolean deleteFiles(String fileName) {
+        LinkedList<String> fileContainers = this.fileContainers();
+        for (int i = 0; i < fileContainers.size(); i++) {
+            this.deleteRemoteFile(fileContainers.get(i), this.REMOTE_DIRECTORY + fileName + "part" + i + ".zip");
+        }
+        return true;
     }
 
     private void onFileUpload(String remoteHost, String file) {

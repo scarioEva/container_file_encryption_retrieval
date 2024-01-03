@@ -47,6 +47,7 @@ public class FileController {
     private FileServers fileservers = new FileServers();
     private FileChunk fileChunk = new FileChunk();
     private CommonClass commonClass = new CommonClass();
+    private int fileVersion;
 
     @FXML
     private TextArea fileTextArea;
@@ -159,11 +160,12 @@ public class FileController {
                 this.mc.dialogue("Error", "Please enter name of the file", Alert.AlertType.ERROR);
             }
         } else {
-
+             this.fileVersion=this.fileVersion+1;
+             
             if (this.userFile) {
                 if (!shareFileCheckBox.isSelected()) {
                     this.acl.deleteACL(this.fileId);
-                    this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent);
+                    this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent, fileVersion, commonClass.currentDate);
                 } else {
 
                     if (userSelect.getValue() != null) {
@@ -174,13 +176,16 @@ public class FileController {
                             this.setUsersPermissions(this.fileId);
                         }
 
-                        this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent);
+                        this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent, fileVersion, commonClass.currentDate);
                     } else {
                         this.mc.dialogue("Error", "Please select user to share file", Alert.AlertType.ERROR);
                     }
                 }
             } else {
-                this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent);
+               
+                this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent, this.fileVersion, commonClass.currentDate);
+                
+                
             }
 
         }
@@ -200,37 +205,6 @@ public class FileController {
 
     }
 
-    private void getFileContent(String fileName) {
-        String remoteFile;
-            if (fileChunk.merge(fileName, fileservers.downloadEncryptedFile(fileName), this.fileId)) {
-                remoteFile = commonClass.localDirectory + fileName+".txt";
-
-                try {
-                    //update to read conainer
-
-                    FileReader fileReader = new FileReader(remoteFile);
-                    var bufferReader = new BufferedReader(fileReader);
-
-                    String fileData;
-
-                    while ((fileData = bufferReader.readLine()) != null) {
-                        fileTextArea.setText(fileData);
-                    }
-                    fileReader.close();
-                    
-                    //delete tem file after sent to TextField
-                    File fl=new File(remoteFile);
-                    fl.delete();
-
-                } catch (FileNotFoundException fe) {
-
-                } catch (IOException ie) {
-
-                }
-        }
-
-    }
-
     private void getFileData(String[] fileData) {
         this.fileId = fileData[1];
         this.createMode = !fileData[2].equals("false");
@@ -243,8 +217,10 @@ public class FileController {
                 if (!data.isEmpty()) {
                     fileNameId.setText(data.get(0).getFilaName());
                     this.filePath = data.get(0).getPath();
+                    this.fileVersion=data.get(0).getVersion();
+                   
 
-                    this.getFileContent(this.filePath);
+                    fileManage.getFileContent(this.filePath+this.fileVersion, this.fileId, fileTextArea);
 
                     String ownerName = this.db.getUser(data.get(0).getUserId(), "id", "name");
 
@@ -332,10 +308,12 @@ public class FileController {
         this.createMode = data[2].equals("true");
         this.userFile = data[3].equals("yes");
 
-        this.getFileData(data);
+
+        
         this.getUserData();
 
         if (!createMode) {
+            this.getFileData(data);
             this.getACLdata();
         }
 
