@@ -56,6 +56,10 @@ public class MainController {
                     FileRestoreController controller = loader.getController();
                     controller.initialise(data);
                 }
+                else if(fileName=="logs.fxml"){
+                    LogsController controller = loader.getController();
+                    controller.initialise(data);
+                }
                 
 //            }
             secondaryStage.setTitle(title);
@@ -110,5 +114,9 @@ public class MainController {
     
     public void redirectFileRestore(String[] data){
         this.openView(954,653,"fileRestore.fxml","Restore file",data);
+    }
+    
+    public void redirectFileLog(String[] data){
+        this.openView(1102,400,"logs.fxml","File log",data);
     }
 }

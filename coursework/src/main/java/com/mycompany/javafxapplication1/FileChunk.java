@@ -30,7 +30,7 @@ import org.apache.commons.io.FilenameUtils;
  */
 public class FileChunk {
 
-    private static byte PART_SIZE = 4;
+    private static byte PART_COUNT = 4;
     private CommonClass commonClass = new CommonClass();
     private String fileId;
     private DB db = new DB();
@@ -74,12 +74,12 @@ public class FileChunk {
                 filePart = null;
 
                 String zipFileName = commonClass.localDirectory + name + "part" + Integer.toString(nChunks - 1) + ".zip";
-                ZipFile zipfile = new ZipFile(zipFileName);
-//                ZipFile zipfile = new ZipFile(zipFileName, encryptionKey.toCharArray());
+//                ZipFile zipfile = new ZipFile(zipFileName);
+                ZipFile zipfile = new ZipFile(zipFileName, encryptionKey.toCharArray());
 
                 File partFile = new File(newFileName);
-                zipfile.addFile(partFile);
-//                zipfile.addFile(partFile, zipParameters);
+//                zipfile.addFile(partFile);
+                zipfile.addFile(partFile, zipParameters);
 
                 fileArray.add(zipFileName);
                 partFile.delete();
@@ -103,13 +103,13 @@ public class FileChunk {
         }
     }
 
-    private int getSizeInBytes(long largefileSizeInBytes, int numberOfFilesforSplit) {
-        if (largefileSizeInBytes % numberOfFilesforSplit != 0) {
-            largefileSizeInBytes = ((largefileSizeInBytes / numberOfFilesforSplit) + 1) * numberOfFilesforSplit;
+    private int getSizeInBytes(long sizeInBytes, int splitCount) {
+        if (sizeInBytes % splitCount != 0) {
+            sizeInBytes = ((sizeInBytes / splitCount) + 1) * splitCount;
         }
-        long x = largefileSizeInBytes / numberOfFilesforSplit;
+        long x = sizeInBytes / splitCount;
         if (x > Integer.MAX_VALUE) {
-            throw new NumberFormatException("size too large");
+            throw new NumberFormatException("file size exceeded");
         }
         return (int) x;
     }
@@ -117,7 +117,7 @@ public class FileChunk {
     public void fileSplit(File fl, String name, String newFileId, Boolean isCreate) throws IOException {
         this.fileId = newFileId;
         this.isCreate = isCreate;
-        this.split(fl, name, (byte) this.getSizeInBytes(fl.length(), this.PART_SIZE));
+        this.split(fl, name, (byte) this.getSizeInBytes(fl.length(), this.PART_COUNT));
     }
 
     private String getDecryptionKey() {
@@ -130,8 +130,8 @@ public class FileChunk {
             String fileName = commonClass.localDirectory + fileArray.get(i);
 
             try {
-                ZipFile zipFile = new ZipFile(fileName);
-//                ZipFile zipFile = new ZipFile(fileName, key.toCharArray());
+//                ZipFile zipFile = new ZipFile(fileName);
+                ZipFile zipFile = new ZipFile(fileName, key.toCharArray());
 
                 zipFile.extractAll(commonClass.localDirectory);
                 System.out.println("unzipping");

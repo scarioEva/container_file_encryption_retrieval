@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
+import javafx.stage.Stage;
 
 /**
  *
@@ -69,6 +70,7 @@ public class FileManagment {
 
             db.addFileDataToDB(generateFileId, userId, fileName, actualFileName, this.fileLength, 1, commonClass.currentDate);
             db.addFileVersionsToDB(generateFileId, 1, fileName, commonClass.currentDate);
+            db.addLogToDb(generateFileId, "You created new file name: " + fileName);
             if (this.mc.dialogue("File created successfully", "Successful!", Alert.AlertType.INFORMATION).equals("OK")) {
                 flag = true;
             }
@@ -85,11 +87,15 @@ public class FileManagment {
 
     }
 
-    public boolean updatFile(String id, String name, String fileName, String content, int version, String modification_date) {
+    public void updatFile(String id, String name, String fileName, String content, int version, String modification_date, String currentUser, Stage stage) {
+
         Boolean flag = false;
         String newFileName = fileName + version;
         String filePath = commonClass.localDirectory + newFileName + ".txt";
         try {
+            String currentFileUserId = db.getSingleFileData("fileId", id, "userId");
+            String owner = db.getUser(currentFileUserId, "id", "name");
+
             File fl = new File(filePath);
 //            fl.getParentFile().mkdirs();
 
@@ -97,6 +103,7 @@ public class FileManagment {
 
             db.updateFileData(id, name, fl.length() + "bytes", version, commonClass.displayDate(modification_date), true);
             db.addFileVersionsToDB(id, version, name, modification_date);
+            db.addLogToDb(id, (currentUser.equals(owner) ? "You" : currentUser) + " updated the file with file name: \"" + name + "\" and content: \"" + content + "\".");
 
             FileChunk fs = new FileChunk();
 
@@ -114,15 +121,17 @@ public class FileManagment {
             Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            String[] data = {currentUser};
+            mc.redirectUser(data);
+            stage.close();
         }
-
-        return flag;
 
     }
 
     public long getFileContent(String fileName, String fileId, TextArea fileTextArea) {
         String remoteFile;
-        long fileSize=0;
+        long fileSize = 0;
         if (fileChunk.merge(fileName, fileServers.downloadEncryptedFile(fileName), fileId)) {
             remoteFile = commonClass.localDirectory + fileName + ".txt";
 
@@ -152,5 +161,26 @@ public class FileManagment {
         }
         return fileSize;
 
+    }
+
+    public void deleteFile(String fileId, String fileName, Stage stage, String username) {
+        Stage primaryStage = (Stage) stage;
+        if (this.mc.dialogue("Confirmation", "Are you sure you want to delete " + fileName + "?", Alert.AlertType.CONFIRMATION).equals("OK")) {
+            try {
+                db.deleteFile(fileId);
+                db.addLogToDb(fileId, "You deleted the file: \"" + fileName + "\"");
+                if (this.mc.dialogue("Succcess", "File deleted successfully!", Alert.AlertType.INFORMATION).equals("OK")) {
+
+                    String[] data = {username};
+                    this.mc.redirectUser(data);
+                    primaryStage.close();
+                }
+            } catch (InvalidKeySpecException ex) {
+                Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
     }
 }

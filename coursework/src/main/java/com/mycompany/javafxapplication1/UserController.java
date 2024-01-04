@@ -77,8 +77,8 @@ public class UserController {
 
     @FXML
     private Button fileRestoreBtn;
-    
-    @FXML 
+
+    @FXML
     private TableView userFileTable;
 
     @FXML
@@ -182,7 +182,6 @@ public class UserController {
         primaryStage.close();
     }
 
-
 //    public void getSharedFileValue(String value) {
 //        System.out.println(value);
 //        try {
@@ -200,7 +199,6 @@ public class UserController {
 //            Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //    }
-
     private void getFileData() {
         ObservableList<FileData> data;
 
@@ -209,13 +207,21 @@ public class UserController {
             data = this.db.getFileFromTable(userId, "userId");
 //            aclData = this.db.getUserAcl(userId, "userId");
 
-           TableColumn fileName = new TableColumn("File Name");
+            TableColumn fileName = new TableColumn("File Name");
             fileName.setCellValueFactory(
                     new PropertyValueFactory<>("fileName"));
             
-            TableColumn edit = new TableColumn("Action");
+            TableColumn date_created = new TableColumn("Date created ");
+            date_created.setCellValueFactory(
+                    new PropertyValueFactory<>("createdAt"));
             
-            Callback<TableColumn<FileData, String>, TableCell<FileData, String>> cellFactory
+            TableColumn last_modified = new TableColumn("Last modified");
+            last_modified.setCellValueFactory(
+                    new PropertyValueFactory<>("lastModified"));
+
+            TableColumn edit = new TableColumn("Action");
+
+            Callback<TableColumn<FileData, String>, TableCell<FileData, String>> editCellFactory
                     = new Callback<TableColumn<FileData, String>, TableCell<FileData, String>>() {
                 @Override
                 public TableCell call(final TableColumn<FileData, String> param) {
@@ -243,18 +249,49 @@ public class UserController {
                 }
             };
 
+            edit.setCellFactory(editCellFactory);
 
-            edit.setCellFactory(cellFactory);
+            TableColumn delete = new TableColumn("Action");
+
+            Callback<TableColumn<FileData, String>, TableCell<FileData, String>> delCellFactory
+                    = new Callback<TableColumn<FileData, String>, TableCell<FileData, String>>() {
+                @Override
+                public TableCell call(final TableColumn<FileData, String> param) {
+                    final TableCell<FileData, String> cell = new TableCell<FileData, String>() {
+
+                        @Override
+                        public void updateItem(String item, boolean empty) {
+                            super.updateItem(item, empty);
+                            if (empty) {
+                                setGraphic(null);
+                                setText(null);
+                            } else {
+                                FileData fileData = getTableView().getItems().get(getIndex());
+                                final Button btn = new Button("Delete");
+
+                                btn.setOnAction(event -> {
+                                    fileManage.deleteFile(fileData.getFileId(), fileData.getFilaName(), (Stage) fileCreate.getScene().getWindow(), username);
+                                });
+                                setGraphic(btn);
+                                setText(null);
+                            }
+                        }
+                    };
+                    return cell;
+                }
+            };
+
+            delete.setCellFactory(delCellFactory);
+
             userFileTable.setItems(data);
-            userFileTable.getColumns().addAll(fileName, edit);
-            
+            userFileTable.getColumns().addAll(fileName,date_created, last_modified, edit, delete);
+
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
 
     private void getAclList() {
         try {
@@ -267,15 +304,25 @@ public class UserController {
             TableColumn fileName = new TableColumn("File Name");
             fileName.setCellValueFactory(
                     new PropertyValueFactory<>("fileName"));
+            
+             TableColumn owner = new TableColumn("Owner");
+            owner.setCellValueFactory(
+                    new PropertyValueFactory<>("owner"));
+            
+//              TableColumn date_created = new TableColumn("Date created");
+//            date_created.setCellValueFactory(
+//                    new PropertyValueFactory<>("created_at_date"));
+//            
+//              TableColumn last_modified = new TableColumn("Last modified");
+//            last_modified.setCellValueFactory(
+//                    new PropertyValueFactory<>("last_updated_date"));
 
             TableColumn write = new TableColumn("Write");
             write.setCellValueFactory(
                     new PropertyValueFactory<>("write"));
 
-
             TableColumn action = new TableColumn("Action");
 
-            
             Callback<TableColumn<AclList, String>, TableCell<AclList, String>> cellFactory
                     = new Callback<TableColumn<AclList, String>, TableCell<AclList, String>>() {
                 @Override
@@ -307,8 +354,7 @@ public class UserController {
 
             action.setCellFactory(cellFactory);
             sharedFileTableView.setItems(aclList);
-            sharedFileTableView.getColumns().addAll(fileName, write, action);
-
+            sharedFileTableView.getColumns().addAll(fileName,owner, action);
 
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);

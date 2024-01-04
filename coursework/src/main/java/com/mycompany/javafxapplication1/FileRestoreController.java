@@ -80,7 +80,7 @@ public class FileRestoreController {
     private Boolean deleteRemoteFiles() {
         System.out.println(this.selectedVersion + ", " + this.no_of_versions);
         for (int i = this.selectedVersion; i < this.no_of_versions; i++) {
-            System.out.println(i+1);
+            System.out.println(i + 1);
             this.fileServer.deleteFiles(this.filePath + (i + 1));
         }
 
@@ -93,6 +93,7 @@ public class FileRestoreController {
         try {
             if (this.deleteRemoteFiles()) {
                 db.updateFileData(this.fileId, this.selectedFileName, this.fileSize + "bytes", this.selectedVersion, this.selectedDate, true);
+                db.addLogToDb(this.fileId, "You restored or rolebacked to \""+this.selectedDate+"\" with the file name: "+this.selectedFileName);
                 db.deleteFileVersions(this.fileId, this.selectedVersion);
 
                 if (this.mainController.dialogue("Success!", "File Restored Successfully!", Alert.AlertType.CONFIRMATION).equals("OK")) {
@@ -172,7 +173,7 @@ public class FileRestoreController {
     }
 
     private void getFileVersions(String fileId) {
-
+        versionTable.getColumns().clear();
         try {
             ObservableList<FileVersions> versionList = this.db.getFileVersionList(fileId);
 
@@ -201,7 +202,7 @@ public class FileRestoreController {
                                 final Button btn = new Button("select");
 
                                 btn.setOnAction(event -> {
-                                    fileNameText.setText(fileData.getFilaName() + " <--- " + oldFileName);
+                                    fileNameText.setText(fileData.getFilaName() + ".txt <--- " + oldFileName+".txt");
                                     showContent(fileData.getFilaVersion());
                                     selectedVersion = fileData.getFilaVersion();
                                     selectedFileName = fileData.getFilaName();

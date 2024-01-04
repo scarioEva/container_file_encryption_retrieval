@@ -52,7 +52,7 @@ public class CommonClass {
     }
 
     public String generateRandomString(int n) {
-        StringBuilder sb = new StringBuilder(n);
+        StringBuilder stringBuilder = new StringBuilder(n);
         for (int i = 0; i < n; i++) {
 
             // generate a random number between 
@@ -60,10 +60,10 @@ public class CommonClass {
             int index = (int) (this.AlphaNumericString.length() * Math.random());
 
             // add Character one by one in end of sb 
-            sb.append(this.AlphaNumericString.charAt(index));
+            stringBuilder.append(this.AlphaNumericString.charAt(index));
         }
 
-        return sb.toString();
+        return stringBuilder.toString();
     }
 
 }

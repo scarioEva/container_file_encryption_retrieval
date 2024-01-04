@@ -48,6 +48,7 @@ public class FileController {
     private FileChunk fileChunk = new FileChunk();
     private CommonClass commonClass = new CommonClass();
     private int fileVersion;
+    private String fileName;
 
     @FXML
     private TextArea fileTextArea;
@@ -67,10 +68,6 @@ public class FileController {
     @FXML
     private Label ownerNameId;
 
-    //testing
-    @FXML
-    private GridPane test;
-
     @FXML
     private GridPane shareContainer;
 
@@ -84,6 +81,18 @@ public class FileController {
     private CheckBox shareFileCheckBox;
 
     @FXML
+    private Label createdLabel;
+
+    @FXML
+    private Label modifiedLabel;
+
+    @FXML
+    private Button logBtn;
+
+    @FXML
+    private GridPane infoContainer;
+
+    @FXML
     private void onShareFIleChecked() {
         if (shareFileCheckBox.isSelected()) {
             shareContainer.setVisible(true);
@@ -95,17 +104,7 @@ public class FileController {
 
     public void setUsersPermissions(String currentFileId) {
         if (userFile) {
-
-            try {
-                String userId = this.db.getUser(userSelect.getValue().toString(), "name", "id");
-                acl.addACL(userId, currentFileId, writeCheckbox.isSelected());
-
-            } catch (InvalidKeySpecException ex) {
-                Logger.getLogger(FileController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(FileController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
+            acl.addACL(userSelect.getValue().toString(), currentFileId, writeCheckbox.isSelected());
         }
     }
 
@@ -138,14 +137,20 @@ public class FileController {
         return flag;
     }
 
+    private void updateFile(String fileName, String fileContent) {
+        Stage primaryStage = (Stage) fileSaveId.getScene().getWindow();
+        this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent, fileVersion, commonClass.currentDate, this.username, primaryStage);
+    }
+
     @FXML
     private void onSave() throws InvalidKeySpecException, ClassNotFoundException {
 //        this.setUsersPermissions();
 
         String fileName = fileNameId.getText();
         String fileContent = fileTextArea.getText();
-        if (createMode) {
-            if (!fileName.equals("")) {
+        if (!fileName.equals("")) {
+            if (createMode) {
+
                 if (shareFileCheckBox.isSelected()) {
                     if (userSelect.getValue() != null) {
                         this.onCreateFile(fileName, fileContent);
@@ -157,37 +162,33 @@ public class FileController {
                 }
 
             } else {
-                this.mc.dialogue("Error", "Please enter name of the file", Alert.AlertType.ERROR);
+                this.fileVersion = this.fileVersion + 1;
+
+                if (this.userFile) {
+                    if (!shareFileCheckBox.isSelected()) {
+                        this.acl.deleteACL(this.fileId);
+                        this.updateFile(fileName, fileContent);
+                    } else {
+
+                        if (userSelect.getValue() != null) {
+                            if (checkUserAclExists()) {
+                                this.acl.updateACL(userSelect.getValue().toString(), this.fileId, writeCheckbox.isSelected());
+                            } else {
+                                this.setUsersPermissions(this.fileId);
+                            }
+
+                            this.updateFile(fileName, fileContent);
+                        } else {
+                            this.mc.dialogue("Error", "Please select user to share file", Alert.AlertType.ERROR);
+                        }
+                    }
+                } else {
+                    this.updateFile(fileName, fileContent);
+                }
+
             }
         } else {
-             this.fileVersion=this.fileVersion+1;
-             
-            if (this.userFile) {
-                if (!shareFileCheckBox.isSelected()) {
-                    this.acl.deleteACL(this.fileId);
-                    this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent, fileVersion, commonClass.currentDate);
-                } else {
-
-                    if (userSelect.getValue() != null) {
-                        if (checkUserAclExists()) {
-                            String new_userId = this.db.getUser(userSelect.getValue().toString(), "name", "id");
-                            this.acl.updateACL(new_userId, this.fileId, writeCheckbox.isSelected());
-                        } else {
-                            this.setUsersPermissions(this.fileId);
-                        }
-
-                        this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent, fileVersion, commonClass.currentDate);
-                    } else {
-                        this.mc.dialogue("Error", "Please select user to share file", Alert.AlertType.ERROR);
-                    }
-                }
-            } else {
-               
-                this.fileManage.updatFile(this.fileId, fileName, this.filePath, fileContent, this.fileVersion, commonClass.currentDate);
-                
-                
-            }
-
+            this.mc.dialogue("Error", "Please enter name of the file", Alert.AlertType.ERROR);
         }
 
     }
@@ -202,7 +203,15 @@ public class FileController {
 
     @FXML
     private void onDel() {
+        fileManage.deleteFile(this.fileId, this.fileName, (Stage) fileDelId.getScene().getWindow(), this.username);
+    }
 
+    @FXML
+    private void onLogBtnClick() {
+//        Stage primaryStage = (Stage) logBtn.getScene().getWindow();
+        String[] data = {this.username, this.fileId};
+        this.mc.redirectFileLog(data);
+//        primaryStage.close();
     }
 
     private void getFileData(String[] fileData) {
@@ -215,12 +224,14 @@ public class FileController {
             if (!this.createMode) {
                 data = this.db.getFileFromTable(this.fileId, "fileId");
                 if (!data.isEmpty()) {
-                    fileNameId.setText(data.get(0).getFilaName());
+                    this.fileName = data.get(0).getFilaName();
+                    fileNameId.setText(this.fileName);
                     this.filePath = data.get(0).getPath();
-                    this.fileVersion=data.get(0).getVersion();
-                   
+                    this.fileVersion = data.get(0).getVersion();
+                    createdLabel.setText(data.get(0).getCreatedAt());
+                    modifiedLabel.setText(data.get(0).getLastModified());
 
-                    fileManage.getFileContent(this.filePath+this.fileVersion, this.fileId, fileTextArea);
+                    fileManage.getFileContent(this.filePath + this.fileVersion, this.fileId, fileTextArea);
 
                     String ownerName = this.db.getUser(data.get(0).getUserId(), "id", "name");
 
@@ -308,8 +319,8 @@ public class FileController {
         this.createMode = data[2].equals("true");
         this.userFile = data[3].equals("yes");
 
+        infoContainer.setVisible(!this.createMode);
 
-        
         this.getUserData();
 
         if (!createMode) {

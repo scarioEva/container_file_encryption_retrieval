@@ -37,6 +37,7 @@ public class App extends Application {
             myObj.createACLsTable();
             myObj.createEncryptionTable();
             myObj.createFileVersionsTable();
+            myObj.createFileLogTable();
 
 
         } catch (ClassNotFoundException ex) {
