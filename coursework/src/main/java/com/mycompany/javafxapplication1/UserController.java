@@ -361,7 +361,6 @@ public class UserController {
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
     public void initialise(String credentials[]) {

@@ -59,15 +59,19 @@ public class RegisterController {
     private void registerBtnHandler(ActionEvent event) {
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
         try {
+            //check there is empty input field
             if (userTextField.getText().equals("") || passPasswordField.getText().equals("")) {
                 this.mc.dialogue("Error", "Username or password cannot be empty!", Alert.AlertType.ERROR);
             } else {
+                //check pass and confirm pass match
                 if (passPasswordField.getText().equals(rePassPasswordField.getText())) {
+                    //check if password length is greater than or equal to 8
                     if (passPasswordField.getText().length() >= 8) {
+                        //validate if user already exist in database
                         if (!this.db.validateUser(userTextField.getText())) {
+                            //add data to database
                             this.db.addUserDataToDB(userTextField.getText(), passPasswordField.getText());
                             this.mc.dialogue("Adding information to the database", "Successful!", Alert.AlertType.INFORMATION);
-//                        String[] credentials = {userTextField.getText(), passPasswordField.getText()};
                             String[] credentials = {userTextField.getText()};
                             this.mc.redirectUser(credentials);
 

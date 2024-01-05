@@ -275,7 +275,6 @@ public class FileController {
                         userData.add(user);
                     }
                 }
-
 //                ((ChoiceBox)userSelect).setItems(userData);
                 userSelect.getItems().addAll(userData);
                 

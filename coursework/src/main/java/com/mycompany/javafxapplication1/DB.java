@@ -229,7 +229,6 @@ public class DB {
      * @return true if the credentials are valid, otherwise false
      */
     public boolean validateUser(String user, String pass) throws InvalidKeySpecException, ClassNotFoundException {
-
         Boolean flag = false;
         try {
             ResultSet rs = this.executeDb("select name, password from " + this.dataBaseTableName, true);

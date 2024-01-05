@@ -36,10 +36,10 @@ public class MainController {
             Scene scene = new Scene(root, width, height);
             secondaryStage.setScene(scene);
 //            if(!data.equals("")){
-            if (fileName == "primary.fxml") {
-                PrimaryController controller = loader.getController();
-                controller.initialise();
-            }
+//            if (fileName == "primary.fxml") {
+//                PrimaryController controller = loader.getController();
+//                controller.initialise();
+//            }
             if (fileName == "admin.fxml") {
                 AdminController controller = loader.getController();
                 controller.initialise(data);
@@ -76,7 +76,7 @@ public class MainController {
     }
 
     public String dialogue(String headerMsg, String contentMsg, Alert.AlertType alertType) {
-        Stage secondaryStage = new Stage();
+        
         Group root = new Group();
         Scene scene = new Scene(root, 300, 300, Color.DARKGRAY);
         Alert alert = new Alert(alertType);

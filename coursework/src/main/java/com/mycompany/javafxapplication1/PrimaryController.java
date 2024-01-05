@@ -23,7 +23,7 @@ import javafx.scene.paint.Color;
 
 public class PrimaryController {
 
-    private MainController mc = new MainController();
+    private MainController mainController = new MainController();
     private DB db = new DB();
     private CommonClass commonClass = new CommonClass();
     private FileServers fileServers=new FileServers();
@@ -39,10 +39,9 @@ public class PrimaryController {
 
     @FXML
     private void registerBtnHandler(ActionEvent event) {
-        Stage secondaryStage = new Stage();
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
         try {
-            this.mc.redirectRegister();
+            this.mainController.redirectRegister();
             primaryStage.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -50,11 +49,11 @@ public class PrimaryController {
     }
 
     private void userLogin(String[] credentials) {
-        this.mc.redirectUser(credentials);
+        this.mainController.redirectUser(credentials);
     }
 
     private void adminLogin(String[] credentials) {
-        this.mc.redirectAdmin(credentials);
+        this.mainController.redirectAdmin(credentials);
     }
 
     @FXML
@@ -77,7 +76,7 @@ public class PrimaryController {
 
                 primaryStage.close();
             } else {
-                this.mc.dialogue("Invalid User Name / Password", "Please try again!", Alert.AlertType.ERROR);
+                this.mainController.dialogue("Invalid User Name / Password", "Please try again!", Alert.AlertType.ERROR);
             }
 
         } catch (Exception e) {
@@ -137,7 +136,7 @@ public class PrimaryController {
     }
 
     public void initialise() {
-        System.out.println("start");
+//        System.out.println("start");
         this.deleteInactiveFiles();
     }
 }
