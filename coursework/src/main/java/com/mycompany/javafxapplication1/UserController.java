@@ -110,11 +110,11 @@ public class UserController {
 
             if (fileManage.createNewFile(this.username, selectedFileName.substring(0, selectedFileName.length() - 4), content)) {
 
-                if (this.mc.dialogue("Success", "File uploaded successfully", Alert.AlertType.CONFIRMATION).equals("OK")) {
+//                if (this.mc.dialogue("Success", "File uploaded successfully", Alert.AlertType.CONFIRMATION).equals("OK")) {
                     String[] data = {this.username};
                     mc.redirectUser(data);
                     primaryStage.close();
-                }
+//                } 
             }
         }
 

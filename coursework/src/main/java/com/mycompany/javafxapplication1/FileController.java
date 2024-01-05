@@ -26,6 +26,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 /**
@@ -91,6 +93,22 @@ public class FileController {
 
     @FXML
     private GridPane infoContainer;
+
+    @FXML
+    private Button downloadBtn;
+
+    @FXML
+    private void onDownload() {
+        Stage primaryStage = (Stage) downloadBtn.getScene().getWindow();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save");
+        fileChooser.getExtensionFilters().addAll(new ExtensionFilter("text files", "*.txt"));
+
+        File selectedFile = fileChooser.showSaveDialog(primaryStage);
+//        fileChooser.se
+        fileChooser.setInitialDirectory(new File("newfile.txt"));
+
+    }
 
     @FXML
     private void onShareFIleChecked() {
@@ -327,10 +345,16 @@ public class FileController {
             this.getFileData(data);
             this.getACLdata();
         }
+        else{
+            logBtn.setVisible(false);
+            fileDelId.setVisible(false);
+        }
 
         if (!userFile) {
             shareContainer.setVisible(false);
             shareFileCheckBox.setVisible(false);
+            logBtn.setVisible(false);
+            fileDelId.setVisible(false);
         }
     }
 

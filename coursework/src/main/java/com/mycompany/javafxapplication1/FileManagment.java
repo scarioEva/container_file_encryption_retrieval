@@ -69,7 +69,7 @@ public class FileManagment {
             String userId = db.getUser(user, "name", "id");
 
             db.addFileDataToDB(generateFileId, userId, fileName, actualFileName, this.fileLength, 1, commonClass.currentDate);
-            db.addFileVersionsToDB(generateFileId, 1, fileName, commonClass.currentDate);
+            db.addFileVersionsToDB(generateFileId, 1, fileName, commonClass.currentDate, userId);
             db.addLogToDb(generateFileId, "You created new file name: " + fileName);
             if (this.mc.dialogue("File created successfully", "Successful!", Alert.AlertType.INFORMATION).equals("OK")) {
                 flag = true;
@@ -95,15 +95,15 @@ public class FileManagment {
         try {
             String currentFileUserId = db.getSingleFileData("fileId", id, "userId");
             String owner = db.getUser(currentFileUserId, "id", "name");
+            String current_user_id= db.getUser(currentUser, "name", "id");
 
             File fl = new File(filePath);
-//            fl.getParentFile().mkdirs();
 
             this.writeFile(filePath, content);
 
-            db.updateFileData(id, name, fl.length() + "bytes", version, commonClass.displayDate(modification_date), true);
-            db.addFileVersionsToDB(id, version, name, modification_date);
-            db.addLogToDb(id, (currentUser.equals(owner) ? "You" : currentUser) + " updated the file with file name: \"" + name + "\" and content: \"" + content + "\".");
+            db.updateFileData(id, name, fl.length() + "bytes", version, commonClass.displayDate(modification_date), true, "");
+            db.addFileVersionsToDB(id, version, name, modification_date,current_user_id);
+            db.addLogToDb(id, (currentUser.equals(owner) ? "You" : currentUser) + " updated the file with file name: \"" + name + "\".");
 
             FileChunk fs = new FileChunk();
 

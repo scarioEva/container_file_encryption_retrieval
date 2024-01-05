@@ -21,15 +21,19 @@ public class FileData {
     private SimpleIntegerProperty version;
     private SimpleStringProperty createdAt;
     private SimpleStringProperty lastModified;
+    private SimpleStringProperty date_deleted;
 
-    FileData(String fileName, String path, String fileId, String userId, int version, String created_at, String last_modified) {
+
+    FileData(String fileName, String path, String fileId, String userId, int version, String created_at, String last_modified,String date_deleted) {
         this.fileName = new SimpleStringProperty(fileName);
         this.path = new SimpleStringProperty(path);
         this.userId = new SimpleStringProperty(userId);
         this.fileId = new SimpleStringProperty(fileId);
         this.createdAt = new SimpleStringProperty(created_at);
         this.lastModified = new SimpleStringProperty(last_modified);
-        this.version = new SimpleIntegerProperty(version);
+        this.version = new SimpleIntegerProperty(version); 
+        this.date_deleted = new SimpleStringProperty(date_deleted);
+
     }
     
     public final StringProperty fileNameProperty() {
@@ -62,6 +66,10 @@ public class FileData {
     
     public String getLastModified() {
         return lastModified.get();
+    }
+    
+    public String getDateDeleted() {
+        return date_deleted.get();
     }
 
 }

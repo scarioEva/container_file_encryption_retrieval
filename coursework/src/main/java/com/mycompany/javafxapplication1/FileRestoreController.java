@@ -92,8 +92,8 @@ public class FileRestoreController {
         Stage primaryStage = (Stage) saveBtn.getScene().getWindow();
         try {
             if (this.deleteRemoteFiles()) {
-                db.updateFileData(this.fileId, this.selectedFileName, this.fileSize + "bytes", this.selectedVersion, this.selectedDate, true);
-                db.addLogToDb(this.fileId, "You restored or rolebacked to \""+this.selectedDate+"\" with the file name: "+this.selectedFileName);
+                db.updateFileData(this.fileId, this.selectedFileName, this.fileSize + "bytes", this.selectedVersion, this.selectedDate, true, "");
+                db.addLogToDb(this.fileId, "You restored and rolebacked to \""+this.selectedDate+"\" with the file name: "+this.selectedFileName);
                 db.deleteFileVersions(this.fileId, this.selectedVersion);
 
                 if (this.mainController.dialogue("Success!", "File Restored Successfully!", Alert.AlertType.CONFIRMATION).equals("OK")) {
@@ -182,6 +182,10 @@ public class FileRestoreController {
             TableColumn date = new TableColumn("Updated date");
             date.setCellValueFactory(
                     new PropertyValueFactory<>("date"));
+            
+            TableColumn name = new TableColumn("Modified by");
+            name.setCellValueFactory(
+                    new PropertyValueFactory<>("modifiedBy"));
 
             TableColumn action = new TableColumn("Action");
 
@@ -219,7 +223,7 @@ public class FileRestoreController {
 
             action.setCellFactory(cellFactory);
             versionTable.setItems(versionList);
-            versionTable.getColumns().addAll(date, action);
+            versionTable.getColumns().addAll(date,name, action);
 
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(FileRestoreController.class.getName()).log(Level.SEVERE, null, ex);

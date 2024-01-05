@@ -27,6 +27,11 @@
          <children>
             <Label text="File Name:" />
             <TextField fx:id="fileNameId" GridPane.columnIndex="1" />
+            <Label text=".txt" GridPane.columnIndex="2">
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+            </Label>
          </children>
       </GridPane>
       <TextArea fx:id="fileTextArea" layoutX="26.0" layoutY="85.0" prefHeight="192.0" prefWidth="587.0" />
@@ -132,5 +137,6 @@
       </GridPane>
       <CheckBox fx:id="shareFileCheckBox" layoutX="26.0" layoutY="285.0" mnemonicParsing="false" onAction="#onShareFIleChecked" text="Share File" />
       <Button fx:id="logBtn" layoutX="496.0" layoutY="56.0" mnemonicParsing="false" onAction="#onLogBtnClick" text="Logs" />
+      <Button fx:id="downloadBtn" layoutX="406.0" layoutY="56.0" mnemonicParsing="false" onAction="#onDownload" text="Download" />
    </children>
 </AnchorPane>
