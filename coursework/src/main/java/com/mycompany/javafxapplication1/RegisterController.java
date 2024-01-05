@@ -30,9 +30,10 @@ import javafx.stage.Stage;
  * @author ntu-user
  */
 public class RegisterController {
-    private MainController mc=new MainController();
-    private DB db=new DB();
-    
+
+    private MainController mc = new MainController();
+    private DB db = new DB();
+
     /**
      * Initializes the controller class.
      */
@@ -50,39 +51,42 @@ public class RegisterController {
 
     @FXML
     private TextField userTextField;
-    
+
     @FXML
     private Text fileText;
-    
+
     @FXML
     private void registerBtnHandler(ActionEvent event) {
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
         try {
-            if(userTextField.getText().equals("") || passPasswordField.getText().equals("")){
-                this.mc.dialogue("Error", "Username or password cannot be empty!",Alert.AlertType.ERROR);
-            }
-            else{
-                  if (passPasswordField.getText().equals(rePassPasswordField.getText())) {
-                      if(!this.db.validateUser(userTextField.getText())){
-                        this.db.addUserDataToDB(userTextField.getText(), passPasswordField.getText());
-                        this.mc.dialogue("Adding information to the database", "Successful!",Alert.AlertType.INFORMATION);
+            if (userTextField.getText().equals("") || passPasswordField.getText().equals("")) {
+                this.mc.dialogue("Error", "Username or password cannot be empty!", Alert.AlertType.ERROR);
+            } else {
+                if (passPasswordField.getText().equals(rePassPasswordField.getText())) {
+                    if (passPasswordField.getText().length() >= 8) {
+                        if (!this.db.validateUser(userTextField.getText())) {
+                            this.db.addUserDataToDB(userTextField.getText(), passPasswordField.getText());
+                            this.mc.dialogue("Adding information to the database", "Successful!", Alert.AlertType.INFORMATION);
 //                        String[] credentials = {userTextField.getText(), passPasswordField.getText()};
-                        String[] credentials={userTextField.getText()};
-                        this.mc.redirectUser(credentials);
+                            String[] credentials = {userTextField.getText()};
+                            this.mc.redirectUser(credentials);
 
-                      }
-                      else{
-                          this.mc.dialogue("Error", "User already exist.",Alert.AlertType.ERROR);
-                          return;
-                      }
-                    
+                        } else {
+                            this.mc.dialogue("Error", "User already exist.", Alert.AlertType.ERROR);
+                            return;
+                        }
+                    }
+                    else{
+                        this.mc.dialogue("Error", "Password must contain atleast 8 characters. You entered "+ passPasswordField.getText().length() +" characters.", Alert.AlertType.ERROR);
+                        return;
+                    }
+
                 } else {
-                    this.mc.dialogue("Error", "password and confirm password did not match.",Alert.AlertType.ERROR);
+                    this.mc.dialogue("Error", "password and confirm password did not match.", Alert.AlertType.ERROR);
                     return;
                 }
                 primaryStage.close();
             }
-            
 
         } catch (Exception e) {
             e.printStackTrace();

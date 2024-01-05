@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  */
 public class CommonClass {
 
-    public String localDirectory = "/home/ntu-";
+    public String localDirectory = "/home/ntu-user/APP/temp/";
     public LinkedList<String> fileList = new LinkedList();
     private String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "abcdefghijklmnopqrstuvxyz";
 
