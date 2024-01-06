@@ -15,9 +15,13 @@ import java.util.logging.Logger;
 public class ACLManagment {
     private DB db=new DB();
     
-    public void addACL(String userId, String fileId, Boolean write){
+    public void addACL(String username, String fileId, Boolean write){
         try {
+            String userId = this.db.getUser(username, "name", "id");
             this.db.addACLData(userId, fileId, write);
+            
+            this.db.addLogToDb(fileId, "You granted the access to "+ (write? "write":"read")+" the file to the following user: "+username);
+            
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(ACLManagment.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
@@ -25,9 +29,12 @@ public class ACLManagment {
         }
     }
     
-    public void updateACL(String userId, String fileId, Boolean write){
+    public void updateACL(String username, String fileId, Boolean write){
         try {
+            String userId = this.db.getUser(username, "name", "id");
             this.db.updateACLData(fileId, userId, write);
+            this.db.addLogToDb(fileId, "You modified the permission to "+ (write? "write":"read")+" the file to the following user: "+username);
+            
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(ACLManagment.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
@@ -38,6 +45,8 @@ public class ACLManagment {
     public void deleteACL(String fileId){
         try {
             this.db.deleteACL(fileId);
+            this.db.addLogToDb(fileId, "You had removed the acces to share your file to the other user.");
+            
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(ACLManagment.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {

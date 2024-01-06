@@ -1,20 +1,11 @@
 package com.mycompany.javafxapplication1;
 
 import java.security.spec.InvalidKeySpecException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -26,7 +17,7 @@ import javafx.stage.Stage;
 
 public class AdminController {
     
-    private MainController mc=new MainController();
+    private MainController mainController=new MainController();
     private DB db=new DB();
     
     @FXML
@@ -59,7 +50,7 @@ public class AdminController {
             data=this.db.getActiveUser();
             
             if(this.db.setUserActive(data.get(0).getUser(), false)){
-                this.mc.redirectLogin();
+                this.mainController.redirectLogin();
                 primaryStage.close();
             }
 
@@ -73,7 +64,6 @@ public class AdminController {
         ObservableList<User> data;
         try {
             data = this.db.getDataFromTable();
-//            data = myObj.getActiveUser();
 
             TableColumn user = new TableColumn("User");
             user.setCellValueFactory(

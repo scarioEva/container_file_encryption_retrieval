@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Button?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.javafxapplication1.PrimaryController">
+<VBox alignment="CENTER" prefHeight="177.0" prefWidth="555.0" spacing="20.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.javafxapplication1.PrimaryController">
    <children>
       <Label text="User Login" />
       <GridPane alignment="CENTER">
@@ -27,8 +28,14 @@
             <TextField fx:id="userTextField" GridPane.columnIndex="1" />
             <Label text="Password" GridPane.rowIndex="1" />
             <PasswordField fx:id="passPasswordField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Button fx:id="registerBtn" mnemonicParsing="false" onAction="#registerBtnHandler" text="Register" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-            <Button fx:id="loginButton" onAction="#handleLogin" text="Login" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+            <Button fx:id="registerBtn" mnemonicParsing="false" onAction="#registerBtnHandler" text="Register" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+               <GridPane.margin>
+                  <Insets right="100.0" />
+               </GridPane.margin></Button>
+            <Button fx:id="loginButton" onAction="#handleLogin" text="Login" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+               <GridPane.margin>
+                  <Insets left="100.0" />
+               </GridPane.margin></Button>
          </children>
       </GridPane>
    </children>
