@@ -35,8 +35,8 @@ public class FileVersions {
     }
 
     public String getFilaName() {
-                                                                                                                                                return fileName.get();
-                                                                                                                                            }
+        return fileName.get();
+    }
 
     public String getFilaId() {
         return fileId.get();

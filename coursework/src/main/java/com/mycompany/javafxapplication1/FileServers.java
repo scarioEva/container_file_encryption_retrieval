@@ -61,6 +61,7 @@ public class FileServers {
         return (ChannelSftp) sftp;
     }
 
+    //creating array and adding file server ip address inside array
     private LinkedList fileContainers() {
         LinkedList<String> fileContainers = new LinkedList();
         fileContainers.add(this.FILE_CONATINER1_REMOTE_HOST);
@@ -72,11 +73,12 @@ public class FileServers {
     }
 
     private void deleteRemoteFile(String server, String fileName) {
-        System.out.println("onDelete:"+ fileName);
-
         try {
             ChannelSftp channelSftp = setupJsch(server);
+            
+            //checking if file exist in remote server
             if (this.checkFileExists(server, fileName)) {
+                //removing file from server
                 channelSftp.rm(fileName);
             }
         } catch (JSchException ex) {
@@ -86,20 +88,15 @@ public class FileServers {
         }
     }
 
-    public void fileUpload(LinkedList<String> array, String fileName) {
+    public void fileUpload(LinkedList<String> fileArray, String fileName) {
 
         LinkedList<String> fileContainers = this.fileContainers();
 
-//        for (int i = 0; i < array.size(); i++) {
-//            onFileUpload(fileContainers.get(i), array.get(i));
-//        }
         for (int i = 0; i < fileContainers.size(); i++) {
-            if (i < array.size()) {
-                onFileUpload(fileContainers.get(i), array.get(i));
-                System.out.println("call " + i);
+            
+            if (i < fileArray.size()) {
+                onFileUpload(fileContainers.get(i), fileArray.get(i));
             } else {
-
-                System.out.println(fileContainers.get(i) + "===" + fileName);
                 this.deleteRemoteFile(fileContainers.get(i), this.REMOTE_DIRECTORY + fileName + "part" + i + ".zip");
             }
         }
@@ -116,10 +113,7 @@ public class FileServers {
     private void onFileUpload(String remoteHost, String file) {
         File fl = new File(file);
         try {
-
             ChannelSftp channelSftp = setupJsch(remoteHost);
-//            channelSftp.connect();
-
             channelSftp.put(file, this.REMOTE_DIRECTORY);
             channelSftp.exit();
 
@@ -127,6 +121,7 @@ public class FileServers {
             Logger.getLogger(FileServers.class.getName()).log(Level.SEVERE, null, e);
         } finally {
 
+            //delete local encrypted chunk file in temp folder after delete
             fl.delete();
 
             if (jschSession != null) {
@@ -165,6 +160,7 @@ public class FileServers {
                     ChannelSftp channelSftp = setupJsch(servers.get(i));
                     channelSftp.get(name, commonClass.localDirectory);
 
+                    //adding downloaded file name to fileList array
                     filesList.add(this.getFileName(fileName, i));
                 }
             } catch (JSchException ex) {

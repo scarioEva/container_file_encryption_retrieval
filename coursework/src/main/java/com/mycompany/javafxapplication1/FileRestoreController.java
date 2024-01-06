@@ -4,22 +4,13 @@
  */
 package com.mycompany.javafxapplication1;
 
-import java.net.URL;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -77,6 +68,7 @@ public class FileRestoreController {
         primaryStage.close();
     }
 
+    //delete later version of file from which user will roleback
     private Boolean deleteRemoteFiles() {
         System.out.println(this.selectedVersion + ", " + this.no_of_versions);
         for (int i = this.selectedVersion; i < this.no_of_versions; i++) {
@@ -93,7 +85,8 @@ public class FileRestoreController {
         try {
             if (this.deleteRemoteFiles()) {
                 db.updateFileData(this.fileId, this.selectedFileName, this.fileSize + "bytes", this.selectedVersion, this.selectedDate, true, "");
-                db.addLogToDb(this.fileId, "You restored and rolebacked to \""+this.selectedDate+"\" with the file name: "+this.selectedFileName);
+                db.addLogToDb(this.fileId, "You restored and rolebacked to \"" + this.selectedDate + "\" with the file name: " + this.selectedFileName);
+                //delete later versions from databse
                 db.deleteFileVersions(this.fileId, this.selectedVersion);
 
                 if (this.mainController.dialogue("Success!", "File Restored Successfully!", Alert.AlertType.CONFIRMATION).equals("OK")) {
@@ -115,6 +108,7 @@ public class FileRestoreController {
         try {
             String userId = db.getUser(this.username, "name", "id");
 
+            //get file file list with version 1 ( starting created file) from version databse
             ObservableList<FileRestore> fileList = this.db.getUserFiles(userId);
 
             TableColumn fileName = new TableColumn("File Name");
@@ -175,6 +169,7 @@ public class FileRestoreController {
     private void getFileVersions(String fileId) {
         versionTable.getColumns().clear();
         try {
+            //get file version from the selected file id on file version database
             ObservableList<FileVersions> versionList = this.db.getFileVersionList(fileId);
 
             this.no_of_versions = versionList.size();
@@ -182,7 +177,7 @@ public class FileRestoreController {
             TableColumn date = new TableColumn("Updated date");
             date.setCellValueFactory(
                     new PropertyValueFactory<>("date"));
-            
+
             TableColumn name = new TableColumn("Modified by");
             name.setCellValueFactory(
                     new PropertyValueFactory<>("modifiedBy"));
@@ -206,7 +201,9 @@ public class FileRestoreController {
                                 final Button btn = new Button("select");
 
                                 btn.setOnAction(event -> {
-                                    fileNameText.setText(fileData.getFilaName() + ".txt <--- " + oldFileName+".txt");
+                                    //show file name <--- previous file name
+                                    fileNameText.setText(fileData.getFilaName() + ".txt <--- " + oldFileName + ".txt");
+
                                     showContent(fileData.getFilaVersion());
                                     selectedVersion = fileData.getFilaVersion();
                                     selectedFileName = fileData.getFilaName();
@@ -223,7 +220,7 @@ public class FileRestoreController {
 
             action.setCellFactory(cellFactory);
             versionTable.setItems(versionList);
-            versionTable.getColumns().addAll(date,name, action);
+            versionTable.getColumns().addAll(date, name, action);
 
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(FileRestoreController.class.getName()).log(Level.SEVERE, null, ex);
@@ -236,6 +233,7 @@ public class FileRestoreController {
         fileContent.setVisible(true);
         saveBtn.setVisible(true);
 
+        //get file content with file size to store on variable for updating to file metadata table
         this.fileSize = fileManage.getFileContent(this.filePath + version, this.fileId, fileContent);
     }
 

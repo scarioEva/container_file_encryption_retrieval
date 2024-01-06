@@ -4,12 +4,10 @@
  */
 package com.mycompany.javafxapplication1;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -80,8 +78,6 @@ public class CommonClass {
             
             if(difference_In_Days>=31)
                 flag=true;
-            
-            System.out.println(d2+": "+difference_In_Days);
            
         } catch (ParseException ex) {
             Logger.getLogger(CommonClass.class.getName()).log(Level.SEVERE, null, ex);

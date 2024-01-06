@@ -26,7 +26,6 @@ public class FileManagment {
 
     private DB db = new DB();
     private MainController mainController = new MainController();
-    FileServers fc = new FileServers();
     private CommonClass commonClass = new CommonClass();
     private String fileLength;
     private FileChunk fileChunk = new FileChunk();
@@ -44,33 +43,40 @@ public class FileManagment {
     }
 
     public boolean createNewFile(String user, String fileName, String content) {
+        //generate new file id
         String generateFileId = commonClass.generateRandomString(10);
 
         Boolean flag = false;
         try {
+            //generate new fileName to store to server 
             String actualFileName = commonClass.generateRandomString(10);
 
+            //adding fileName with version 1(only creating)
             String filePathId = actualFileName + 1;
             String filePath = commonClass.localDirectory + filePathId + ".txt";
 
             File fl = new File(filePath);
-//            fl.getParentFile().mkdirs();
 
+            //creating new file to local temp folder
             if (fl.createNewFile()) {
                 this.writeFile(filePath, content);
             }
             this.fileLength = fl.length() + "bytes";
 
-            FileChunk fs = new FileChunk();
-
-            fs.fileSplit(fl, filePathId, generateFileId, true);
-//            fc.fileUpload(fl, fl, fl, fl);
+            //calling function to split the file into chunks
+            this.fileChunk.fileSplit(fl, filePathId, generateFileId, true);
 
             String userId = db.getUser(user, "name", "id");
 
+            //add file metadata to db
             db.addFileDataToDB(generateFileId, userId, fileName, actualFileName, this.fileLength, 1, commonClass.currentDate);
+
+            //add file version to file Version db
             db.addFileVersionsToDB(generateFileId, 1, fileName, commonClass.currentDate, userId);
+
+            //add audit trail data to log db
             db.addLogToDb(generateFileId, "You created new file name: " + fileName);
+
             if (this.mainController.dialogue("File created successfully", "Successful!", Alert.AlertType.INFORMATION).equals("OK")) {
                 flag = true;
             }
@@ -87,7 +93,7 @@ public class FileManagment {
 
     }
 
-    public void updatFile(String id, String name, String fileName, String content, int version, String modification_date, String currentUser, Stage stage) {
+    public Boolean updatFile(String id, String name, String fileName, String content, int version, String modification_date, String currentUser, Stage stage) {
 
         Boolean flag = false;
         String newFileName = fileName + version;
@@ -101,15 +107,17 @@ public class FileManagment {
 
             this.writeFile(filePath, content);
 
+            //update mile metadata to databse
             db.updateFileData(id, name, fl.length() + "bytes", version, commonClass.displayDate(modification_date), true, "");
+
+            //update file versions to databse
             db.addFileVersionsToDB(id, version, name, modification_date, current_user_id);
+
+            //add logs to db
             db.addLogToDb(id, (currentUser.equals(owner) ? "You" : currentUser) + " updated the file with file name: \"" + name + "\".");
 
-            FileChunk fs = new FileChunk();
-
-            System.out.println("path:" + filePath + "\nfilename:" + newFileName);
-
-            fs.fileSplit(fl, newFileName, id, false);
+            //split the file
+            this.fileChunk.fileSplit(fl, newFileName, id, false);
 
             if (this.mainController.dialogue("File updated successfully", "Successful!", Alert.AlertType.INFORMATION).equals("OK")) {
                 flag = true;
@@ -127,17 +135,19 @@ public class FileManagment {
             stage.close();
         }
 
+        return flag;
+
     }
 
     public long getFileContent(String fileName, String fileId, TextArea fileTextArea) {
         String remoteFile;
         long fileSize = 0;
+        //download chunk file then decrypt and merge the file and store it onto temp folder
         if (fileChunk.merge(fileName, fileServers.downloadEncryptedFile(fileName), fileId)) {
             remoteFile = commonClass.localDirectory + fileName + ".txt";
 
             try {
-                //update to read conainer
-
+                //read the downloaded file from the temp folder
                 FileReader fileReader = new FileReader(remoteFile);
                 var bufferReader = new BufferedReader(fileReader);
 
@@ -149,9 +159,10 @@ public class FileManagment {
                 fileTextArea.setText(output);
                 fileReader.close();
 
-                //delete tem file after sent to TextField
                 File fl = new File(remoteFile);
                 fileSize = fl.length();
+
+                //delete temp file after sent to TextArea
                 fl.delete();
 
             } catch (FileNotFoundException fe) {
@@ -160,6 +171,7 @@ public class FileManagment {
 
             }
         }
+        //used when restoring file and update the size of the previous file to the database
         return fileSize;
 
     }
@@ -168,7 +180,10 @@ public class FileManagment {
         Stage primaryStage = (Stage) stage;
         if (this.mainController.dialogue("Confirmation", "Are you sure you want to delete " + fileName + "?", Alert.AlertType.CONFIRMATION).equals("OK")) {
             try {
+                //set file to inactive on file metadata table
                 db.deleteFile(fileId);
+
+                //add logs
                 db.addLogToDb(fileId, "You deleted the file: \"" + fileName + "\"");
                 if (this.mainController.dialogue("Succcess", "File deleted successfully!", Alert.AlertType.INFORMATION).equals("OK")) {
 
@@ -186,6 +201,7 @@ public class FileManagment {
     }
 
     public void downloadFile(Stage stage, String fileId, String filePath, int version, String fileName) {
+        Boolean flag = false;
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save");
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("text files", "*.txt"));
@@ -195,10 +211,13 @@ public class FileManagment {
 
         if (selectedFile != null) {
 
+            //get destination path while saving via file chooser
             String destination_path = selectedFile.getAbsolutePath();
 
+            //get exact filename with version from the file server
             String remoteFileName = filePath + version;
 
+            //download chunk file then decrypt and merge the file and store it onto temp folder
             if (fileChunk.merge(remoteFileName, fileServers.downloadEncryptedFile(remoteFileName), fileId)) {
                 FileReader fileReader = null;
                 String remoteFile = commonClass.localDirectory + remoteFileName + ".txt";
@@ -214,18 +233,24 @@ public class FileManagment {
                         output += fileData + System.getProperty("line.separator");
 
                     }
+                    //transfering file content from temp folder to the deftination file
                     File fl = new File(destination_path);
 
                     if (fl.createNewFile()) {
                         this.writeFile(destination_path, output);
                     }
 
+                    flag = true;
+
                 } catch (FileNotFoundException ex) {
+                    flag = false;
                     Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {
+                    flag = false;
                     Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
                     try {
+                        //deleting file from temp folder
                         rf.delete();
                         fileReader.close();
                     } catch (IOException ex) {
@@ -234,7 +259,11 @@ public class FileManagment {
                 }
             }
 
-            mainController.dialogue("Succes", "File downloaded successfully!", Alert.AlertType.INFORMATION);
+            if (flag) {
+                mainController.dialogue("Succes", "File downloaded successfully!", Alert.AlertType.INFORMATION);
+            } else {
+                mainController.dialogue("Error", "Something went wrong. Please try agaian", Alert.AlertType.ERROR);
+            }
 
         }
     }

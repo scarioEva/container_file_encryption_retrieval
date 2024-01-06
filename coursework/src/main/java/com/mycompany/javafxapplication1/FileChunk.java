@@ -8,13 +8,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.nio.file.Files;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.lingala.zip4j.ZipFile;
@@ -22,7 +17,6 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.model.enums.CompressionLevel;
 import net.lingala.zip4j.model.enums.EncryptionMethod;
-import org.apache.commons.io.FilenameUtils;
 
 /**
  *
@@ -38,6 +32,7 @@ public class FileChunk {
 
     private void split(File file, String name, byte part_size) {
 
+        //creating encryption key based on fileId if not exist in Encryption database
         String encryptionKey = isCreate ? commonClass.generateRandomString(10) : this.getDecryptionKey();
 
         ZipParameters zipParameters = new ZipParameters();
@@ -55,6 +50,7 @@ public class FileChunk {
         LinkedList<String> fileArray = new LinkedList();
         try {
             inputStream = new FileInputStream(inputFile);
+            //Splitting file into chunks
             while (fileSize > 0) {
                 if (fileSize <= part_size) {
                     readLength = fileSize;
@@ -65,6 +61,7 @@ public class FileChunk {
                 assert (read == byteChunkPart.length);
                 nChunks++;
 
+                //creating chunk file name and storing it into temp folder
                 newFileName = file + ".part" + Integer.toString(nChunks - 1);
                 filePart = new FileOutputStream(new File(newFileName));
                 filePart.write(byteChunkPart);
@@ -73,24 +70,30 @@ public class FileChunk {
                 byteChunkPart = null;
                 filePart = null;
 
+                //creating zip file name
                 String zipFileName = commonClass.localDirectory + name + "part" + Integer.toString(nChunks - 1) + ".zip";
-//                ZipFile zipfile = new ZipFile(zipFileName);
+                //adding encryption key
                 ZipFile zipfile = new ZipFile(zipFileName, encryptionKey.toCharArray());
 
                 File partFile = new File(newFileName);
-//                zipfile.addFile(partFile);
+                
+                //adding chunk file inside zip
                 zipfile.addFile(partFile, zipParameters);
 
+                //adding zipfile name into array name fileArray 
                 fileArray.add(zipFileName);
+                //deleting chunk file
                 partFile.delete();
             }
             inputStream.close();
+            //deleting main file from temp folder
             file.delete();
-            FileServers fc = new FileServers();
-            fc.fileUpload(fileArray, name);
+            FileServers fileServers = new FileServers();
+            //sending arrays of zip file to get the path from temp file 
+            fileServers.fileUpload(fileArray, name);
 
             //adding encryption key to database
-            if (isCreate) {
+            if (this.isCreate) {
                 db.addKeysToDb(encryptionKey, this.fileId);
             }
 
@@ -103,6 +106,7 @@ public class FileChunk {
         }
     }
 
+    //calculating chunk byte size based on number of splt count
     private int getSizeInBytes(long sizeInBytes, int splitCount) {
         if (sizeInBytes % splitCount != 0) {
             sizeInBytes = ((sizeInBytes / splitCount) + 1) * splitCount;
@@ -126,11 +130,11 @@ public class FileChunk {
 
     private Boolean decryptFile(LinkedList<String> fileArray) {
         String key = this.getDecryptionKey();
+        //decrepting each chunk files and store it into temp folder
         for (int i = 0; i < fileArray.size(); i++) {
             String fileName = commonClass.localDirectory + fileArray.get(i);
 
             try {
-//                ZipFile zipFile = new ZipFile(fileName);
                 ZipFile zipFile = new ZipFile(fileName, key.toCharArray());
 
                 zipFile.extractAll(commonClass.localDirectory);
@@ -139,6 +143,7 @@ public class FileChunk {
             } catch (ZipException ex) {
                 Logger.getLogger(FileChunk.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
+                //delete zip files
                 File fl = new File(fileName);
                 fl.delete();
             }
@@ -148,17 +153,18 @@ public class FileChunk {
 
     public Boolean merge(String outputFile, LinkedList<String> fileArray, String fileId) {
         this.fileId = fileId;
-        System.out.println("merge calling");
         Boolean flag = false;
         LinkedList<String> fileList = new LinkedList();
 
         if (this.decryptFile(fileArray)) {
+            //creating new output file in temp folder
             File ofile = new File(commonClass.localDirectory + outputFile + ".txt");
             FileOutputStream fos;
             FileInputStream fis;
             byte[] fileBytes;
             int bytesRead = 0;
 
+            //loop till no. of chunks
             for (int i = 0; i < fileArray.size(); i++) {
                 fileList.add(outputFile + ".txt.part" + i);
             }
@@ -183,7 +189,6 @@ public class FileChunk {
                 fos = null;
                 flag = true;
 
-                //write code to delete zip file and empty list
             } catch (Exception exception) {
                 exception.printStackTrace();
             } finally {

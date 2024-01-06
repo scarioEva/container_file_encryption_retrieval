@@ -4,24 +4,14 @@
  */
 package com.mycompany.javafxapplication1;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Optional;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /**
@@ -52,14 +42,12 @@ public class RegisterController {
     @FXML
     private TextField userTextField;
 
-    @FXML
-    private Text fileText;
 
     @FXML
-    private void registerBtnHandler(ActionEvent event) {
+    private void registerBtnHandler() {
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
         try {
-            //check there is empty input field
+            //check if there is empty input field
             if (userTextField.getText().equals("") || passPasswordField.getText().equals("")) {
                 this.mc.dialogue("Error", "Username or password cannot be empty!", Alert.AlertType.ERROR);
             } else {
@@ -73,6 +61,7 @@ public class RegisterController {
                             this.db.addUserDataToDB(userTextField.getText(), passPasswordField.getText());
                             this.mc.dialogue("Adding information to the database", "Successful!", Alert.AlertType.INFORMATION);
                             String[] credentials = {userTextField.getText()};
+                            //redirect to user page
                             this.mc.redirectUser(credentials);
 
                         } else {
@@ -101,6 +90,7 @@ public class RegisterController {
     private void backLoginBtnHandler(ActionEvent event) {
         Stage primaryStage = (Stage) backLoginBtn.getScene().getWindow();
         try {
+            //refirect to login page
             this.mc.redirectLogin();
             primaryStage.close();
 

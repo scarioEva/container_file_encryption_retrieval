@@ -4,20 +4,12 @@
  */
 package com.mycompany.javafxapplication1;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
 import java.security.spec.InvalidKeySpecException;
 import java.util.LinkedList;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -26,8 +18,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 /**
@@ -38,7 +28,7 @@ import javafx.stage.Stage;
 public class FileController {
     
     private String username;
-    private MainController mc = new MainController();
+    private MainController mainController = new MainController();
     private FileManagment fileManage = new FileManagment();
     private Boolean createMode = true;
     private Boolean userFile = true;
@@ -46,8 +36,6 @@ public class FileController {
     private String fileId;
     private String filePath;
     private ACLManagment acl = new ACLManagment();
-    private FileServers fileservers = new FileServers();
-    private FileChunk fileChunk = new FileChunk();
     private CommonClass commonClass = new CommonClass();
     private int fileVersion;
     private String fileName;
@@ -101,21 +89,23 @@ public class FileController {
     private void onDownload() {
         Stage primaryStage = (Stage) downloadBtn.getScene().getWindow();
         fileManage.downloadFile(primaryStage, this.fileId, this.filePath, this.fileVersion, this.fileName);
-        
     }
     
     @FXML
-    private void onShareFIleChecked() {
+    private void onShareFileChecked() {
+        //show shared file details when its checked 
         if (shareFileCheckBox.isSelected()) {
             shareContainer.setVisible(true);
         } else {
             shareContainer.setVisible(false);
+            //set user select dropdwon value to null
             userSelect.setValue(null);
         }
     }
     
     public void setUsersPermissions(String currentFileId) {
-        if (userFile) {
+        //only user can add permission to share file with other user
+        if (this.userFile) {
             acl.addACL(userSelect.getValue().toString(), currentFileId, writeCheckbox.isSelected());
         }
     }
@@ -124,7 +114,7 @@ public class FileController {
         Stage primaryStage = (Stage) fileSaveId.getScene().getWindow();
         if (fileManage.createNewFile(this.username, fileName, fileContent)) {
 
-            // get filed id of the newly created file and psss to setUserPermission() to add ACL data
+            // get filed id of the newly created file and psss to setUserPermission() to add ACL data to databse
             if (shareFileCheckBox.isSelected()) {
                 String userId = this.db.getUser(this.username, "name", "id");
                 ObservableList<FileData> fileData;
@@ -133,11 +123,13 @@ public class FileController {
             }
             
             String[] data = {this.username};
-            mc.redirectUser(data);
+            //after file create then redirect to user page
+            this.mainController.redirectUser(data);
             primaryStage.close();
         }
     }
     
+    //chek if current file is shared by other user
     private Boolean checkUserAclExists() throws ClassNotFoundException, InvalidKeySpecException {
         Boolean flag = false;
         ObservableList<ACL> data;
@@ -156,33 +148,42 @@ public class FileController {
     
     @FXML
     private void onSave() throws InvalidKeySpecException, ClassNotFoundException {
-//        this.setUsersPermissions();
 
         String fileName = fileNameId.getText();
         String fileContent = fileTextArea.getText();
+        //check if file name is not empty
         if (!fileName.equals("")) {
+            //check if user is newly creating the file
             if (createMode) {
                 
                 if (shareFileCheckBox.isSelected()) {
+                    //check if user dropdown select is not empty
                     if (userSelect.getValue() != null) {
                         this.onCreateFile(fileName, fileContent);
                     } else {
-                        this.mc.dialogue("Error", "Please select user to share the file", Alert.AlertType.ERROR);
+                        this.mainController.dialogue("Error", "Please select user to share the file", Alert.AlertType.ERROR);
                     }
                 } else {
                     this.onCreateFile(fileName, fileContent);
                 }
                 
             } else {
+                //comming to file update
+                
+                //update file version
                 this.fileVersion = this.fileVersion + 1;
                 
+                //check if current user is the owner of the current file
                 if (this.userFile) {
+                    //if checkbox is uncheck after update then ACL data(permission) should be deleted based on current file id
                     if (!shareFileCheckBox.isSelected()) {
                         this.acl.deleteACL(this.fileId);
                         this.updateFile(fileName, fileContent);
                     } else {
                         
+                        //update permission if checkbox is checked
                         if (userSelect.getValue() != null) {
+                            //if current file has other user permission then update permission else create new one 
                             if (checkUserAclExists()) {
                                 this.acl.updateACL(userSelect.getValue().toString(), this.fileId, writeCheckbox.isSelected());
                             } else {
@@ -191,7 +192,7 @@ public class FileController {
                             
                             this.updateFile(fileName, fileContent);
                         } else {
-                            this.mc.dialogue("Error", "Please select user to share file", Alert.AlertType.ERROR);
+                            this.mainController.dialogue("Error", "Please select user to share file", Alert.AlertType.ERROR);
                         }
                     }
                 } else {
@@ -200,7 +201,7 @@ public class FileController {
                 
             }
         } else {
-            this.mc.dialogue("Error", "Please enter name of the file", Alert.AlertType.ERROR);
+            this.mainController.dialogue("Error", "Please enter name of the file", Alert.AlertType.ERROR);
         }
         
     }
@@ -209,7 +210,7 @@ public class FileController {
     private void onCancel() {
         Stage primaryStage = (Stage) fileCancelId.getScene().getWindow();
         String[] data = {this.username};
-        this.mc.redirectUser(data);
+        this.mainController.redirectUser(data);
         primaryStage.close();
     }
     
@@ -220,20 +221,16 @@ public class FileController {
     
     @FXML
     private void onLogBtnClick() {
-//        Stage primaryStage = (Stage) logBtn.getScene().getWindow();
         String[] data = {this.username, this.fileId};
-        this.mc.redirectFileLog(data);
-//        primaryStage.close();
+        this.mainController.redirectFileLog(data);
     }
     
-    private void getFileData(String[] fileData) {
-        this.fileId = fileData[1];
-        this.createMode = !fileData[2].equals("false");
-        this.userFile = fileData[3].equals("yes");
+    private void getFileData() {
         
         ObservableList<FileData> data;
         try {
             if (!this.createMode) {
+                //get file data from database and file servers to edit the file
                 data = this.db.getFileFromTable(this.fileId, "fileId");
                 if (!data.isEmpty()) {
                     this.fileName = data.get(0).getFilaName();
@@ -251,6 +248,7 @@ public class FileController {
                 }
                 
             } else {
+                //for creating new file
                 ownerNameId.setText(this.username);
             }
         } catch (ClassNotFoundException ex) {
@@ -272,10 +270,12 @@ public class FileController {
                 for (int i = 0; i < data.size(); i++) {
                     String user = data.get(i).getUser();
                     if (!user.equals(this.username) && !user.equals("admin")) {
+                        //store only user name on array
                         userData.add(user);
                     }
                 }
-//                ((ChoiceBox)userSelect).setItems(userData);
+                
+                //add array of usernames on userSelect dropdown list for selecting user to share the current file
                 userSelect.getItems().addAll(userData);
                 
             }
@@ -292,7 +292,9 @@ public class FileController {
             
             data = this.db.getUserAcl(this.fileId, "fileId");
             if (!data.isEmpty()) {
-                if (userFile) {
+                
+                //if current user is the owner of the current file
+                if (this.userFile) {
                     String shared_username = this.db.getUser(data.get(0).getUserId(), "id", "name");
                     if (!shared_username.equals("")) {
                         shareContainer.setVisible(true);
@@ -308,6 +310,7 @@ public class FileController {
                         
                     }
                 } else {
+                    //restricting other user to only read the file
                     if (data.get(0).getWrite().equals("false")) {
                         fileSaveId.setVisible(false);
                         fileDelId.setVisible(false);
@@ -327,6 +330,7 @@ public class FileController {
     public void initialise(String[] data) {
         shareContainer.setVisible(false);
         this.username = data[0];
+        this.fileId = data[1];
         this.createMode = data[2].equals("true");
         this.userFile = data[3].equals("yes");
         
@@ -334,15 +338,15 @@ public class FileController {
         
         this.getUserData();
         
-        if (!createMode) {
-            this.getFileData(data);
+        if (!this.createMode) {
+            this.getFileData();
             this.getACLdata();
         } else {
             logBtn.setVisible(false);
             fileDelId.setVisible(false);
         }
         
-        if (!userFile) {
+        if (!this.userFile) {
             shareContainer.setVisible(false);
             shareFileCheckBox.setVisible(false);
             logBtn.setVisible(false);

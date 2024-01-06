@@ -35,11 +35,11 @@ public class MainController {
             Parent root = loader.load();
             Scene scene = new Scene(root, width, height);
             secondaryStage.setScene(scene);
-//            if(!data.equals("")){
-//            if (fileName == "primary.fxml") {
-//                PrimaryController controller = loader.getController();
-//                controller.initialise();
-//            }
+            
+            if (fileName == "primary.fxml") {
+                PrimaryController controller = loader.getController();
+                controller.initialise();
+            }
             if (fileName == "admin.fxml") {
                 AdminController controller = loader.getController();
                 controller.initialise(data);
@@ -59,13 +59,9 @@ public class MainController {
                 LogsController controller = loader.getController();
                 controller.initialise(data);
             }
-
-//            }
             secondaryStage.setTitle(title);
             secondaryStage.show();
 
-//          String msg="some data sent from Primary Controller";
-//          secondaryStage.setUserData(msg);
         } catch (IOException ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidKeySpecException ex) {
@@ -76,11 +72,10 @@ public class MainController {
     }
 
     public String dialogue(String headerMsg, String contentMsg, Alert.AlertType alertType) {
-        
+
         Group root = new Group();
         Scene scene = new Scene(root, 300, 300, Color.DARKGRAY);
         Alert alert = new Alert(alertType);
-//        alert.setTitle(alertType == Alert.AlertType.CONFIRMATION? "Confirmation Dialog":"Error Dialog");
         alert.setHeaderText(headerMsg);
         alert.setContentText(contentMsg);
         Optional<ButtonType> result = alert.showAndWait();

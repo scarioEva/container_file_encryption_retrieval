@@ -135,7 +135,7 @@
                </GridPane.margin></ChoiceBox>
          </children>
       </GridPane>
-      <CheckBox fx:id="shareFileCheckBox" layoutX="26.0" layoutY="285.0" mnemonicParsing="false" onAction="#onShareFIleChecked" text="Share File" />
+      <CheckBox fx:id="shareFileCheckBox" layoutX="26.0" layoutY="285.0" mnemonicParsing="false" onAction="#onShareFileChecked" text="Share File" />
       <Button fx:id="logBtn" layoutX="496.0" layoutY="56.0" mnemonicParsing="false" onAction="#onLogBtnClick" text="Logs" />
       <Button fx:id="downloadBtn" layoutX="406.0" layoutY="56.0" mnemonicParsing="false" onAction="#onDownload" text="Download" />
    </children>

@@ -21,7 +21,6 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException, InvalidKeySpecException {
-//        Stage secondaryStage = new Stage();
         DB myObj = new DB();
         myObj.log("-------- Simple Tutorial on how to make JDBC connection to SQLite DB ------------");
 //        myObj.log("\n---------- Drop table ----------");

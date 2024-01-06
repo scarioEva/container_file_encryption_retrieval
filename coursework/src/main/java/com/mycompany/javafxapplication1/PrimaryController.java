@@ -1,25 +1,18 @@
 package com.mycompany.javafxapplication1;
 
-import java.io.IOException;
+
 import java.security.spec.InvalidKeySpecException;
-import java.util.Optional;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.paint.Color;
 
 public class PrimaryController {
 
@@ -38,9 +31,10 @@ public class PrimaryController {
     private PasswordField passPasswordField;
 
     @FXML
-    private void registerBtnHandler(ActionEvent event) {
+    private void registerBtnHandler() {
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
         try {
+            //redirect to register page
             this.mainController.redirectRegister();
             primaryStage.close();
         } catch (Exception e) {
@@ -62,12 +56,14 @@ public class PrimaryController {
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
         try {
             DB myObj = new DB();
-//            String[] credentials = {userTextField.getText(), passPasswordField.getText()};
             String[] credentials = {userTextField.getText()};
+            //validate username and passwrod from database
             if (myObj.validateUser(userTextField.getText(), passPasswordField.getText())) {
 
+                //set user active on database
                 myObj.setUserActive(userTextField.getText(), true);
 
+                
                 if (!userTextField.getText().equals("admin")) {
                     userLogin(credentials);
                 } else {
@@ -88,10 +84,10 @@ public class PrimaryController {
         ObservableList<FileData> data;
 
         try {
+            //get user deleted inactive filed from database
             data = db.getInactiveFile();
 
             if (!data.isEmpty()) {
-                System.out.println(data.get(0).getDateDeleted());
 
                 for (int i = 0; i < data.size(); i++) {
                     
@@ -136,7 +132,6 @@ public class PrimaryController {
     }
 
     public void initialise() {
-//        System.out.println("start");
         this.deleteInactiveFiles();
     }
 }

@@ -5,39 +5,21 @@
 package com.mycompany.javafxapplication1;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.security.spec.InvalidKeySpecException;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Group;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -49,12 +31,9 @@ import javafx.util.Callback;
  */
 public class UserController {
 
-    private String fileName = "newfile.txt";
     private String username;
     private MainController mc = new MainController();
     private DB db = new DB();
-    private String userFileId;
-    private String sharedFileId;
     private FileManagment fileManage = new FileManagment();
 
     @FXML
@@ -82,7 +61,7 @@ public class UserController {
     private TableView userFileTable;
 
     @FXML
-    private void selectBtnHandler(ActionEvent event) throws IOException {
+    private void selectBtnHandler() throws IOException {
         Stage primaryStage = (Stage) selectBtn.getScene().getWindow();
         primaryStage.setTitle("Select a File");
 
@@ -91,30 +70,28 @@ public class UserController {
         File selectedFile = fileChooser.showOpenDialog(primaryStage);
 
         if (selectedFile != null) {
-//            System.out.println();
+            
             String selectedFileName = selectedFile.getName();
-
+            
+            //get file from selected path
             FileReader fileReader = new FileReader(selectedFile);
             var bufferReader = new BufferedReader(fileReader);
 
             String content = "";
 
             String fileData;
-
+            //read the file
             while ((fileData = bufferReader.readLine()) != null) {
-                content = fileData;
+                 content += fileData + System.getProperty("line.separator");
+                
             }
             fileReader.close();
 
-            System.out.println("content:" + content);
-
+            //create the new file with new filename and move the content to new file
             if (fileManage.createNewFile(this.username, selectedFileName.substring(0, selectedFileName.length() - 4), content)) {
-
-//                if (this.mc.dialogue("Success", "File uploaded successfully", Alert.AlertType.CONFIRMATION).equals("OK")) {
                     String[] data = {this.username};
                     mc.redirectUser(data);
                     primaryStage.close();
-//                } 
             }
         }
 
@@ -136,7 +113,7 @@ public class UserController {
         try {
 
             data = myObj.getActiveUser();
-
+            //set current user inactive on user table
             if (myObj.setUserActive(data.get(0).getUser(), false)) {
                 this.mc.redirectLogin();
                 primaryStage.close();
@@ -158,18 +135,18 @@ public class UserController {
     @FXML
     private void onFileCreate() {
         Stage primaryStage = (Stage) fileCreate.getScene().getWindow();
+        
+        //pass data with {username, fileId, createMode, isUserFile}
         String[] data = {this.username, "", "true", "yes"};
         this.mc.redirectFile(data, "Create File");
         primaryStage.close();
     }
 
-    @FXML
-    private void onUserFlDel() {
-
-    }
 
     private void onUserFileEdit(String fileId) {
         Stage primaryStage = (Stage) fileCreate.getScene().getWindow();
+        
+        //pass data with {username, fileId, createMode, isUserFile}
         String[] data = {this.username, fileId, "false", "yes"};
         this.mc.redirectFile(data, "Edit file");
         primaryStage.close();
@@ -177,35 +154,21 @@ public class UserController {
 
     private void onSharedFileEdit(String fileId) {
         Stage primaryStage = (Stage) fileCreate.getScene().getWindow();
+        
+        //pass data with {username, fileId, createMode, isUserFile}
         String[] data = {this.username, fileId, "false", "no"};
         this.mc.redirectFile(data, "Edit file");
         primaryStage.close();
     }
 
-//    public void getSharedFileValue(String value) {
-//        System.out.println(value);
-//        try {
-//
-//            String fileName = value;
-//
-//            ObservableList<FileData> fileData;
-//
-//            fileData = db.getFileFromTable(fileName, "name");
-//            sharedFileId = fileData.get(0).getFileId();
-//
-//        } catch (ClassNotFoundException ex) {
-//            Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (InvalidKeySpecException ex) {
-//            Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
     private void getFileData() {
         ObservableList<FileData> data;
 
         try {
             String userId = db.getUser(this.username, "name", "id");
+            
+            //getting user active files from the file metadata table
             data = this.db.getFileFromTable(userId, "userId");
-//            aclData = this.db.getUserAcl(userId, "userId");
 
             TableColumn fileName = new TableColumn("File Name");
             fileName.setCellValueFactory(
@@ -221,6 +184,7 @@ public class UserController {
 
             TableColumn edit = new TableColumn("Action");
 
+            //Creating edit button for edit action column
             Callback<TableColumn<FileData, String>, TableCell<FileData, String>> editCellFactory
                     = new Callback<TableColumn<FileData, String>, TableCell<FileData, String>>() {
                 @Override
@@ -238,6 +202,7 @@ public class UserController {
                                 final Button btn = new Button("Edit");
 
                                 btn.setOnAction(event -> {
+                                    //call button fuction
                                     onUserFileEdit(fileData.getFileId());
                                 });
                                 setGraphic(btn);
@@ -249,10 +214,12 @@ public class UserController {
                 }
             };
 
+            //add edit button on column edit action
             edit.setCellFactory(editCellFactory);
 
             TableColumn delete = new TableColumn("Action");
 
+            //Creating delete button for delete action column
             Callback<TableColumn<FileData, String>, TableCell<FileData, String>> delCellFactory
                     = new Callback<TableColumn<FileData, String>, TableCell<FileData, String>>() {
                 @Override
@@ -270,6 +237,7 @@ public class UserController {
                                 final Button btn = new Button("Delete");
 
                                 btn.setOnAction(event -> {
+                                    //call delete file function from FileManagment.java
                                     fileManage.deleteFile(fileData.getFileId(), fileData.getFilaName(), (Stage) fileCreate.getScene().getWindow(), username);
                                 });
                                 setGraphic(btn);
@@ -280,7 +248,8 @@ public class UserController {
                     return cell;
                 }
             };
-
+            
+            //add delete button on column delete action
             delete.setCellFactory(delCellFactory);
 
             userFileTable.setItems(data);
@@ -298,8 +267,8 @@ public class UserController {
             ObservableList<AclList> aclList;
 
             String userId = this.db.getUser(this.username, "name", "id");
+            //get ACL list with current user from ACL list table
             aclList = this.db.getAclFileList(userId);
-//            this.button=new Button[aclList.size];
 
             TableColumn fileName = new TableColumn("File Name");
             fileName.setCellValueFactory(
@@ -308,14 +277,6 @@ public class UserController {
              TableColumn owner = new TableColumn("Owner");
             owner.setCellValueFactory(
                     new PropertyValueFactory<>("owner"));
-            
-//              TableColumn date_created = new TableColumn("Date created");
-//            date_created.setCellValueFactory(
-//                    new PropertyValueFactory<>("created_at_date"));
-//            
-//              TableColumn last_modified = new TableColumn("Last modified");
-//            last_modified.setCellValueFactory(
-//                    new PropertyValueFactory<>("last_updated_date"));
 
             TableColumn write = new TableColumn("Write");
             write.setCellValueFactory(
@@ -323,6 +284,7 @@ public class UserController {
 
             TableColumn action = new TableColumn("Action");
 
+            //create button to add to column action
             Callback<TableColumn<AclList, String>, TableCell<AclList, String>> cellFactory
                     = new Callback<TableColumn<AclList, String>, TableCell<AclList, String>>() {
                 @Override
@@ -337,11 +299,12 @@ public class UserController {
                                 setText(null);
                             } else {
                                 AclList aclData = getTableView().getItems().get(getIndex());
+                                //set the name of the button based on user permission (if write==true the "edit" else "View")
                                 final Button btn = new Button(aclData.getWrite().equals("true") ? "Edit" : "View");
 
                                 btn.setOnAction(event -> {
+                                    //call button function
                                     onSharedFileEdit(aclData.getFileId());
-                                    System.out.println(aclData.getFileId());
                                 });
                                 setGraphic(btn);
                                 setText(null);
@@ -351,7 +314,8 @@ public class UserController {
                     return cell;
                 }
             };
-
+            
+            //add button to action column
             action.setCellFactory(cellFactory);
             sharedFileTableView.setItems(aclList);
             sharedFileTableView.getColumns().addAll(fileName,owner, action);
@@ -366,8 +330,11 @@ public class UserController {
     public void initialise(String credentials[]) {
         this.username = credentials[0];
         userLabel.setText(this.username);
-
+        
+        //get user file list
         this.getFileData();
+        
+        //get files shared by others list
         this.getAclList();
 
     }
