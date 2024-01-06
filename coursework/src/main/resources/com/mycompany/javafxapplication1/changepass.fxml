@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.javafxapplication1.ChangepassController">
+   <children>
+      <Label layoutX="29.0" layoutY="93.0" text="Current Password" />
+      <Button fx:id="saveButton" layoutX="317.0" layoutY="276.0" mnemonicParsing="false" onAction="#onSave" text="Save" />
+      <PasswordField fx:id="currentPass" layoutX="203.0" layoutY="89.0" />
+      <PasswordField fx:id="newPass" layoutX="203.0" layoutY="155.0" />
+      <PasswordField fx:id="confirmNewPass" layoutX="203.0" layoutY="217.0" />
+      <Label layoutX="29.0" layoutY="159.0" text="New Password" />
+      <Label layoutX="23.0" layoutY="221.0" text="Confirm New Password" />
+      <Button fx:id="cancelBtn" layoutX="211.0" layoutY="276.0" mnemonicParsing="false" onAction="#onCancel" text="Cancel" />
+   </children>
+</AnchorPane>

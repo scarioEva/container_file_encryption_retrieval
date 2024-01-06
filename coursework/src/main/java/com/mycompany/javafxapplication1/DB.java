@@ -371,6 +371,17 @@ public class DB {
         }
         return flag;
     }
+    
+    public boolean updatePassword(String password, String username) throws InvalidKeySpecException, ClassNotFoundException {
+        Boolean flag = false;
+        try {
+            this.executeDb("update " + this.dataBaseTableName + " set password='" + password + "' where name='" + username + "'", false);
+        } finally {
+            flag = true;
+            this.closeConnection();
+        }
+        return flag;
+    }
 
     public boolean deleteUser(String id) throws InvalidKeySpecException, ClassNotFoundException {
         Boolean flag = false;

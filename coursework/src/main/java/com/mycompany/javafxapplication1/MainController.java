@@ -59,6 +59,10 @@ public class MainController {
                 LogsController controller = loader.getController();
                 controller.initialise(data);
             }
+            else if (fileName == "changepass.fxml") {
+                ChangepassController controller = loader.getController();
+                controller.initialise(data);
+            }
             secondaryStage.setTitle(title);
             secondaryStage.show();
 
@@ -112,5 +116,9 @@ public class MainController {
 
     public void redirectFileLog(String[] data) {
         this.openView(1102, 400, "logs.fxml", "File log", data);
+    }
+    
+    public void redirectChangePass(String[] data) {
+        this.openView(640, 480, "changepass.fxml", "Change Password", data);
     }
 }
