@@ -51,7 +51,12 @@ public class EditProfileController {
     }
 
     @FXML
-    private void onChangePass(){}
+    private void onChangePass(){
+        Stage primaryStage = (Stage) cancelBtn.getScene().getWindow();
+        String[] data= {this.username};
+        mc.redirectChangePass(data);
+        primaryStage.close();  
+    }
     
     @FXML
     private void onCancel(){
