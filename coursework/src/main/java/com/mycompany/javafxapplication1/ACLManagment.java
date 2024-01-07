@@ -16,6 +16,8 @@ public class ACLManagment {
     private DB db=new DB();
     
     public void addACL(String username, String fileId, Boolean write){
+        
+        System.out.println(username+ ", "+ fileId+", "+ write);
         try {
             String userId = this.db.getUser(username, "name", "id");
             this.db.addACLData(userId, fileId, write);
@@ -44,7 +46,7 @@ public class ACLManagment {
     
     public void deleteACL(String fileId){
         try {
-            this.db.deleteACL(fileId);
+            this.db.deleteACL("fileId",fileId);
             this.db.addLogToDb(fileId, "You had removed the acces to share your file to the other user.");
             
         } catch (InvalidKeySpecException ex) {

@@ -42,11 +42,10 @@ public class FileManagment {
         }
     }
 
-    public boolean createNewFile(String user, String fileName, String content) {
+    public String createNewFile(String user, String fileName, String content) {
         //generate new file id
         String generateFileId = commonClass.generateRandomString(10);
 
-        Boolean flag = false;
         try {
             //generate new fileName to store to server 
             String actualFileName = commonClass.generateRandomString(10);
@@ -77,9 +76,8 @@ public class FileManagment {
             //add audit trail data to log db
             db.addLogToDb(generateFileId, "You created new file name: " + fileName);
 
-            if (this.mainController.dialogue("File created successfully", "Successful!", Alert.AlertType.INFORMATION).equals("OK")) {
-                flag = true;
-            }
+            this.mainController.dialogue("File created successfully", "Successful!", Alert.AlertType.INFORMATION);
+         
 
         } catch (IOException ex) {
             Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
@@ -89,7 +87,7 @@ public class FileManagment {
             Logger.getLogger(FileManagment.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        return flag;
+        return generateFileId;
 
     }
 

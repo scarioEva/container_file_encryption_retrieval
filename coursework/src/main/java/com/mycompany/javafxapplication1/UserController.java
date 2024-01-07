@@ -70,9 +70,9 @@ public class UserController {
         File selectedFile = fileChooser.showOpenDialog(primaryStage);
 
         if (selectedFile != null) {
-            
+
             String selectedFileName = selectedFile.getName();
-            
+
             //get file from selected path
             FileReader fileReader = new FileReader(selectedFile);
             var bufferReader = new BufferedReader(fileReader);
@@ -82,16 +82,16 @@ public class UserController {
             String fileData;
             //read the file
             while ((fileData = bufferReader.readLine()) != null) {
-                 content += fileData + System.getProperty("line.separator");
-                
+                content += fileData + System.getProperty("line.separator");
+
             }
             fileReader.close();
 
             //create the new file with new filename and move the content to new file
-            if (fileManage.createNewFile(this.username, selectedFileName.substring(0, selectedFileName.length() - 4), content)) {
-                    String[] data = {this.username};
-                    mc.redirectUser(data);
-                    primaryStage.close();
+            if (!fileManage.createNewFile(this.username, selectedFileName.substring(0, selectedFileName.length() - 4), content).equals("")) {
+                String[] data = {this.username};
+                mc.redirectUser(data);
+                primaryStage.close();
             }
         }
 
@@ -112,12 +112,8 @@ public class UserController {
         ObservableList<User> data;
         try {
 
-            data = myObj.getActiveUser();
-            //set current user inactive on user table
-            if (myObj.setUserActive(data.get(0).getUser(), false)) {
-                this.mc.redirectLogin();
-                primaryStage.close();
-            }
+            this.mc.redirectLogin();
+            primaryStage.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -135,17 +131,16 @@ public class UserController {
     @FXML
     private void onFileCreate() {
         Stage primaryStage = (Stage) fileCreate.getScene().getWindow();
-        
+
         //pass data with {username, fileId, createMode, isUserFile}
         String[] data = {this.username, "", "true", "yes"};
         this.mc.redirectFile(data, "Create File");
         primaryStage.close();
     }
 
-
     private void onUserFileEdit(String fileId) {
         Stage primaryStage = (Stage) fileCreate.getScene().getWindow();
-        
+
         //pass data with {username, fileId, createMode, isUserFile}
         String[] data = {this.username, fileId, "false", "yes"};
         this.mc.redirectFile(data, "Edit file");
@@ -154,7 +149,7 @@ public class UserController {
 
     private void onSharedFileEdit(String fileId) {
         Stage primaryStage = (Stage) fileCreate.getScene().getWindow();
-        
+
         //pass data with {username, fileId, createMode, isUserFile}
         String[] data = {this.username, fileId, "false", "no"};
         this.mc.redirectFile(data, "Edit file");
@@ -166,18 +161,18 @@ public class UserController {
 
         try {
             String userId = db.getUser(this.username, "name", "id");
-            
+
             //getting user active files from the file metadata table
-            data = this.db.getFileFromTable(userId, "userId");
+            data = this.db.getActiveFileFromTable(userId, "userId");
 
             TableColumn fileName = new TableColumn("File Name");
             fileName.setCellValueFactory(
                     new PropertyValueFactory<>("fileName"));
-            
+
             TableColumn date_created = new TableColumn("Date created ");
             date_created.setCellValueFactory(
                     new PropertyValueFactory<>("createdAt"));
-            
+
             TableColumn last_modified = new TableColumn("Last modified");
             last_modified.setCellValueFactory(
                     new PropertyValueFactory<>("lastModified"));
@@ -248,12 +243,12 @@ public class UserController {
                     return cell;
                 }
             };
-            
+
             //add delete button on column delete action
             delete.setCellFactory(delCellFactory);
 
             userFileTable.setItems(data);
-            userFileTable.getColumns().addAll(fileName,date_created, last_modified, edit, delete);
+            userFileTable.getColumns().addAll(fileName, date_created, last_modified, edit, delete);
 
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
@@ -273,8 +268,8 @@ public class UserController {
             TableColumn fileName = new TableColumn("File Name");
             fileName.setCellValueFactory(
                     new PropertyValueFactory<>("fileName"));
-            
-             TableColumn owner = new TableColumn("Owner");
+
+            TableColumn owner = new TableColumn("Owner");
             owner.setCellValueFactory(
                     new PropertyValueFactory<>("owner"));
 
@@ -314,11 +309,11 @@ public class UserController {
                     return cell;
                 }
             };
-            
+
             //add button to action column
             action.setCellFactory(cellFactory);
             sharedFileTableView.setItems(aclList);
-            sharedFileTableView.getColumns().addAll(fileName,owner, action);
+            sharedFileTableView.getColumns().addAll(fileName, owner, action);
 
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
@@ -330,10 +325,10 @@ public class UserController {
     public void initialise(String credentials[]) {
         this.username = credentials[0];
         userLabel.setText(this.username);
-        
+
         //get user file list
         this.getFileData();
-        
+
         //get files shared by others list
         this.getAclList();
 

@@ -1,6 +1,5 @@
 package com.mycompany.javafxapplication1;
 
-
 import java.security.spec.InvalidKeySpecException;
 
 import java.util.logging.Level;
@@ -19,7 +18,7 @@ public class PrimaryController {
     private MainController mainController = new MainController();
     private DB db = new DB();
     private CommonClass commonClass = new CommonClass();
-    private FileServers fileServers=new FileServers();
+    private FileServers fileServers = new FileServers();
 
     @FXML
     private Button registerBtn;
@@ -60,10 +59,6 @@ public class PrimaryController {
             //validate username and passwrod from database
             if (myObj.validateUser(userTextField.getText(), passPasswordField.getText())) {
 
-                //set user active on database
-                myObj.setUserActive(userTextField.getText(), true);
-
-                
                 if (!userTextField.getText().equals("admin")) {
                     userLogin(credentials);
                 } else {
@@ -90,7 +85,7 @@ public class PrimaryController {
             if (!data.isEmpty()) {
 
                 for (int i = 0; i < data.size(); i++) {
-                    
+
                     //check deleted filed date is expiry (ie. exceeds 31 days)
                     if (commonClass.checkFileExpiry(data.get(i).getDateDeleted())) {
                         String fileId = data.get(i).getFileId();
@@ -104,22 +99,22 @@ public class PrimaryController {
                         for (int j = 0; j < no_of_versions; j++) {
                             this.fileServers.deleteFiles(filePath + (j + 1));
                         }
-                        
+
                         //delete all file versions from database
                         db.deleteFileVersions(fileId);
-                        
+
                         //delete user ACL with file id on database
-                        db.deleteACL(fileId);
-                        
+                        db.deleteACL("fileId", fileId);
+
                         //delete encryption key for that file from database
                         db.deleteKey(fileId);
-                        
+
                         //delete file logs from database
                         db.deleteFileLogs(fileId);
-                        
+
                         //delete file metadata from database
                         db.deleteFileMetadata(fileId);
-                        
+
                     }
                 }
             }
