@@ -4,7 +4,6 @@
  */
 package com.mycompany.javafxapplication1;
 
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -21,7 +20,7 @@ import javafx.stage.Stage;
  */
 public class RegisterController {
 
-    private MainController mc = new MainController();
+    private MainController mainController = new MainController();
     private DB db = new DB();
 
     /**
@@ -42,14 +41,13 @@ public class RegisterController {
     @FXML
     private TextField userTextField;
 
-
     @FXML
     private void registerBtnHandler() {
         Stage primaryStage = (Stage) registerBtn.getScene().getWindow();
         try {
             //check if there is empty input field
             if (userTextField.getText().equals("") || passPasswordField.getText().equals("")) {
-                this.mc.dialogue("Error", "Username or password cannot be empty!", Alert.AlertType.ERROR);
+                this.mainController.dialogue("Error", "Username or password cannot be empty!", Alert.AlertType.ERROR);
             } else {
                 //check pass and confirm pass match
                 if (passPasswordField.getText().equals(rePassPasswordField.getText())) {
@@ -59,23 +57,27 @@ public class RegisterController {
                         if (!this.db.validateUser(userTextField.getText())) {
                             //add data to database
                             this.db.addUserDataToDB(userTextField.getText(), passPasswordField.getText());
-                            this.mc.dialogue("Adding information to the database", "Successful!", Alert.AlertType.INFORMATION);
+                            this.mainController.dialogue("Adding information to the database", "Successful!", Alert.AlertType.INFORMATION);
                             String[] credentials = {userTextField.getText()};
-                            //redirect to user page
-                            this.mc.redirectUser(credentials);
+                           
+                            
+                            if (userTextField.getText().equals("admin")) {
+                                this.mainController.redirectAdmin(credentials);
+                            } else {
+                                this.mainController.redirectUser(credentials);
+                            }
 
                         } else {
-                            this.mc.dialogue("Error", "User already exist.", Alert.AlertType.ERROR);
+                            this.mainController.dialogue("Error", "User already exist.", Alert.AlertType.ERROR);
                             return;
                         }
-                    }
-                    else{
-                        this.mc.dialogue("Error", "Password must contain atleast 8 characters. You entered "+ passPasswordField.getText().length() +" characters.", Alert.AlertType.ERROR);
+                    } else {
+                        this.mainController.dialogue("Error", "Password must contain atleast 8 characters. You entered " + passPasswordField.getText().length() + " characters.", Alert.AlertType.ERROR);
                         return;
                     }
 
                 } else {
-                    this.mc.dialogue("Error", "password and confirm password did not match.", Alert.AlertType.ERROR);
+                    this.mainController.dialogue("Error", "password and confirm password did not match.", Alert.AlertType.ERROR);
                     return;
                 }
                 primaryStage.close();
@@ -91,7 +93,7 @@ public class RegisterController {
         Stage primaryStage = (Stage) backLoginBtn.getScene().getWindow();
         try {
             //refirect to login page
-            this.mc.redirectLogin();
+            this.mainController.redirectLogin();
             primaryStage.close();
 
         } catch (Exception e) {
