@@ -152,7 +152,7 @@ public class FileController {
         //check if file name is not empty
         if (!fileName.equals("")) {
             //check if user is newly creating the file
-            if (createMode) {
+            if (this.createMode) {
                 
                 if (shareFileCheckBox.isSelected()) {
                     //check if user dropdown select is not empty

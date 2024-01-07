@@ -85,7 +85,7 @@ public class FileRestoreController {
         try {
             if (this.deleteRemoteFiles()) {
                 db.updateFileData(this.fileId, this.selectedFileName, this.fileSize + "bytes", this.selectedVersion, this.selectedDate, true, "");
-                db.addLogToDb(this.fileId, "You restored and rolebacked to \"" + this.selectedDate + "\" with the file name: " + this.selectedFileName);
+                db.addLogToDb(this.fileId, "You restored and rollbacked to \"" + this.selectedDate + "\" with the file name: " + this.selectedFileName);
                 //delete later versions from databse
                 db.deleteFileVersions(this.fileId, this.selectedVersion);
 
