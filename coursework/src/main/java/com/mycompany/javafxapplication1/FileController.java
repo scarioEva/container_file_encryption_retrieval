@@ -112,14 +112,12 @@ public class FileController {
     
     private void onCreateFile(String fileName, String fileContent) throws InvalidKeySpecException, ClassNotFoundException {
         Stage primaryStage = (Stage) fileSaveId.getScene().getWindow();
-        if (fileManage.createNewFile(this.username, fileName, fileContent)) {
-
+        
+        String newFileId=fileManage.createNewFile(this.username, fileName, fileContent);
+        if (!newFileId.equals("")) {
             // get filed id of the newly created file and psss to setUserPermission() to add ACL data to databse
             if (shareFileCheckBox.isSelected()) {
-                String userId = this.db.getUser(this.username, "name", "id");
-                ObservableList<FileData> fileData;
-                fileData = this.db.getFileFromTable(userId, "userId");
-                this.setUsersPermissions(fileData.get(0).getFileId());
+                this.setUsersPermissions(newFileId);
             }
             
             String[] data = {this.username};
@@ -204,6 +202,11 @@ public class FileController {
             this.mainController.dialogue("Error", "Please enter name of the file", Alert.AlertType.ERROR);
         }
         
+        this.fileId="";
+        this.filePath="";
+        this.fileVersion=0;
+        this.fileName="";
+        
     }
     
     @FXML
@@ -231,7 +234,7 @@ public class FileController {
         try {
             if (!this.createMode) {
                 //get file data from database and file servers to edit the file
-                data = this.db.getFileFromTable(this.fileId, "fileId");
+                data = this.db.getActiveFileFromTable(this.fileId, "fileId");
                 if (!data.isEmpty()) {
                     this.fileName = data.get(0).getFilaName();
                     fileNameId.setText(this.fileName);

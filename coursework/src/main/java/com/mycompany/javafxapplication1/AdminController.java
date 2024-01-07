@@ -13,46 +13,40 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
-
-
 public class AdminController {
-    
-    private MainController mainController=new MainController();
-    private DB db=new DB();
-    
+
+    private MainController mainController = new MainController();
+    private DB db = new DB();
+
     @FXML
     private TextField userTextField;
-    
+
     @FXML
     private TableView dataTableView;
 
     @FXML
     private Button logoutBtn;
-    
+
     @FXML
     private Button refreshBtn;
-    
+
     @FXML
     private TextField customTextField;
-    
+
     @FXML
-    private void RefreshBtnHandler(ActionEvent event){
+    private void RefreshBtnHandler(ActionEvent event) {
         Stage primaryStage = (Stage) customTextField.getScene().getWindow();
-        customTextField.setText((String)primaryStage.getUserData());
+        customTextField.setText((String) primaryStage.getUserData());
     }
-        
+
     @FXML
-    private void handleLogout(){
+    private void handleLogout() {
         Stage primaryStage = (Stage) logoutBtn.getScene().getWindow();
         ObservableList<User> data;
         try {
-            
-            data=this.db.getActiveUser();
-            
-            if(this.db.setUserActive(data.get(0).getUser(), false)){
-                this.mainController.redirectLogin();
-                primaryStage.close();
-            }
+
+            this.mainController.redirectLogin();
+            primaryStage.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,11 +61,11 @@ public class AdminController {
 
             TableColumn user = new TableColumn("User");
             user.setCellValueFactory(
-            new PropertyValueFactory<>("user"));
+                    new PropertyValueFactory<>("user"));
 
             TableColumn pass = new TableColumn("Pass");
             pass.setCellValueFactory(
-                new PropertyValueFactory<>("pass"));
+                    new PropertyValueFactory<>("pass"));
             dataTableView.setItems(data);
             dataTableView.getColumns().addAll(user, pass);
         } catch (ClassNotFoundException ex) {
