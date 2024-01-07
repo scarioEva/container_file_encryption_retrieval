@@ -108,13 +108,9 @@ public class UserController {
     @FXML
     private void handleLogout() {
         Stage primaryStage = (Stage) logoutBtn.getScene().getWindow();
-        DB myObj = new DB();
-        ObservableList<User> data;
         try {
-
             this.mc.redirectLogin();
             primaryStage.close();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
